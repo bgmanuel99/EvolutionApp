@@ -4,12 +4,12 @@ from datetime import datetime
 class BottomFrame(Frame):
 
     def __init__(self, root):
-        Frame.__init__(self, root, width=1280, height=20)
-        self.pack(expand=True, fill=BOTH)
+        Frame.__init__(self, root)
+        self.pack(fill=BOTH)
         self.config(background="gray10")
 
         # Name and version
-        self.name_version_label = Label(self, text="Evolution   |   Version 0.0.1")
+        self.name_version_label = Label(self, text="Evolution   |   Pre-alpha 0.0.1")
         self.name_version_label.pack(side=LEFT, anchor=SW, fill=Y)
         self.name_version_label.config(font=("Terminal"), background="gray10", foreground="dark turquoise")
 
