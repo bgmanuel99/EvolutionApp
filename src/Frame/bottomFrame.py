@@ -5,11 +5,10 @@ class BottomFrame(Frame):
 
     def __init__(self, root):
         Frame.__init__(self, root)
-        self.pack(fill=BOTH)
         self.config(background="gray10")
 
         # Name and version
-        self.name_version_label = Label(self, text="Evolution   |   Pre-alpha 0.0.1")
+        self.name_version_label = Label(self, text="Evolution   |   Pre-alpha 0.0.3")
         self.name_version_label.pack(side=LEFT, anchor=SW, fill=Y)
         self.name_version_label.config(font=("Terminal"), background="gray10", foreground="dark turquoise")
 

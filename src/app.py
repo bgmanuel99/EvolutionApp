@@ -9,12 +9,12 @@ class Application(Tk):
         super().__init__()
         self.title("Evolution")
         self.iconbitmap("../Images/Icon/Evolucion.ico")
-        self.config(bg="gray60")
+        self.resizable(0, 0)
         self.root_menu_bar = RootMenuBar(self)
-        self.config(menu=self.root_menu_bar)
+        self.config(menu=self.root_menu_bar, bg="gray10")
 
         self.top_frame = TopFrame(self)
         self.top_frame.pack(expand=True, fill=BOTH)
 
         self.bottom_frame = BottomFrame(self)
-        self.top_frame.pack(expand=True, fill=BOTH)
+        self.bottom_frame.pack(fill=BOTH, padx=3, ipady=3)
