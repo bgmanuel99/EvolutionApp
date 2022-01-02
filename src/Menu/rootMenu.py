@@ -1,5 +1,6 @@
 from tkinter import Menu
 
+# This class contains the main tool bar of the app
 class RootMenuBar(Menu):
 
     def __init__(self, root):
