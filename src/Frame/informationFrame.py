@@ -34,20 +34,20 @@ class InformationFrame(Frame):
             }
         )])
         terminal_scrollbar_style.map("Arrowless.Vertical.TScrollbar",
-            foreground=[("pressed", "dark turquoise"), ("active", "dark turquoise")],
-            background=[("pressed", "dark turquoise"), ("active", "dark turquoise")]
+            foreground=[("pressed", "gray55"), ("active", "gray55")],
+            background=[("pressed", "gray55"), ("active", "gray55")]
         )
         terminal_scrollbar_style.configure(
             "Arrowless.Vertical.TScrollbar", 
             troughcolor="gray15", 
-            background="dark turquoise"
+            background="gray55"
         )
 
         self.terminal_scrollbar = ttk.Scrollbar(self.terminal_frame, style="Arrowless.Vertical.TScrollbar")
         self.terminal_scrollbar.pack(side=RIGHT, fill=Y)
         
         self.terminal = Text(self.terminal_frame)
-        self.terminal.pack(ipadx=2, ipady=2)
+        self.terminal.pack()
         self.terminal.config(
             font=("Terminal", 12), 
             wrap=WORD, 
