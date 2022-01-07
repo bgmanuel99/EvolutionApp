@@ -9,7 +9,7 @@ class BottomFrame(Frame):
         self.config(background="gray8")
 
         # Name and version Label
-        self.name_version_label = Label(self, text="Evolution   |   Pre-alpha 0.0.3")
+        self.name_version_label = Label(self, text="Evolution   |   Pre-alpha 0.0.4")
         self.name_version_label.pack(side=LEFT, anchor=SW, fill=Y)
         self.name_version_label.config(font=("Terminal"), background="gray8", foreground="dark turquoise")
 
