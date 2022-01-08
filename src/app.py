@@ -1,6 +1,6 @@
 from tkinter import *
-from frame.topFrame import TopFrame
-from frame.bottomFrame import BottomFrame
+from frames.topFrame import TopFrame
+from frames.bottomFrame import BottomFrame
 from menu.rootMenu import RootMenuBar
 
 # This class is for initializing the main window of the app, it contains
