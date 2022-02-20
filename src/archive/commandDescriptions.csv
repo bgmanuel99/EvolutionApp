@@ -1,0 +1,4 @@
+run,Starts the program and the genetic algorithm
+help,Shows all the possible commands to be executed
+clear,Clears the actual terminal
+new,Creates a new terminal

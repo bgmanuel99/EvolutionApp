@@ -1,8 +1,9 @@
 from tkinter import *
 from datetime import datetime
 
-# The BottomFrame is only a display frame, where the name, version and clock of the app are shown
 class BottomFrame(Frame):
+
+    """The bottom frame is only a display frame, where the name, version and clock of the application are shown"""
 
     def __init__(self, root):
         Frame.__init__(self, root)
@@ -11,14 +12,14 @@ class BottomFrame(Frame):
         # Name and version Label
         self.name_version_label = Label(self, text="Evolution   |   Pre-alpha 0.0.5")
         self.name_version_label.pack(side=LEFT, anchor=SW, fill=Y)
-        self.name_version_label.config(font=("Terminal"), background="gray8", foreground="dark turquoise")
+        self.name_version_label.config(font=("Terminal"), background="gray8", foreground="springgreen")
 
         # App's clock
         self.time_text = StringVar()
         self.time_text.set(datetime.now().strftime("%d/%m/%Y %H:%M:%S"))
         self.time_label = Label(self, text=self.time_text)
         self.time_label.pack(side=RIGHT, anchor=SE, fill=Y)
-        self.time_label.config(textvariable=self.time_text, font=("Terminal"), background="gray8", foreground="dark turquoise")
+        self.time_label.config(textvariable=self.time_text, font=("Terminal"), background="gray8", foreground="springgreen")
         self.get_time()
 
     def get_time(self):
