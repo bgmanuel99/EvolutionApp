@@ -28,11 +28,11 @@ class RootMenuBar(Menu, Publisher):
         self.edit_menu.add_command(label="Paste", command=lambda: self.pre_notify("paste"))
 
         self.run_menu = Menu(self, tearoff=0)
-        self.run_menu.add_command(label="Run", command=None)
+        self.run_menu.add_command(label="Run", command=lambda: self.pre_notify("run"))
+        self.run_menu.add_command(label="Stop", command=lambda: self.pre_notify("stop"))
 
         self.terminal_menu = Menu(self, tearoff=0)
         self.terminal_menu.add_command(label="Clear terminal", command=lambda: self.pre_notify("clear"))
-        self.terminal_menu.add_command(label="New terminal", command=lambda: self.pre_notify("new"))
 
         self.help_menu = Menu(self, tearoff=0)
         self.help_menu.add_command(label="Help", command=None)
@@ -68,4 +68,4 @@ class RootMenuBar(Menu, Publisher):
         """Notify all observer about an event"""
 
         for observers in self._observers:
-            observers.update(self)
+            observers.update(self, self.pressed_command)

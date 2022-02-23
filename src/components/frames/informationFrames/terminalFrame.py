@@ -39,6 +39,8 @@ class TerminalFrame(Frame, Publisher):
         self.init_terminal()
         self.terminal.config(state="disabled")
 
+        self.evolution_command = ""
+
     def subscribe(self, observer: Observer) -> None:
         """Subscribes an observer to the publisher"""
 
@@ -53,7 +55,7 @@ class TerminalFrame(Frame, Publisher):
         """Notify all observer about an event"""
         
         for observers in self._observers:
-            observers.update(self)
+            observers.update(self, self.evolution_command)
 
     def write_command(self):
         """Inserts a new line for the user to introduce the next command"""
@@ -63,12 +65,27 @@ class TerminalFrame(Frame, Publisher):
     def proccess_command(self, event):
         """Process the commands introduced by a user from the terminal"""
 
-        command = self.terminal.get("end-1c linestart", "end-1c").split(" ")[2]
+        command = self.terminal.get("end-1c linestart", "end-1c").split(" ")
+        
+        if len(command) < 3:
+            self.new_line()
+            self.write_message("Unknown command, use help to see the possible commands", "red", True)
+            self.write_command()
+            self.terminal.config(state="disabled")
+            return
+        
+        command = command[2]
+
         self.new_line()
 
         if command.lower() == "run":
-            self.notify()
+            self.evolution_command = "run"
             self.write_command()
+            self.notify()
+        elif command.lower() == "stop":
+            self.evolution_command = "stop"
+            self.write_command()
+            self.notify()
         elif command.lower() == "help":
             self.new_line()
             
@@ -83,6 +100,11 @@ class TerminalFrame(Frame, Publisher):
             self.write_command()
         elif command.lower() == "clear":
             self.clear_terminal()
+        elif command.lower() == "exit":
+            self.evolution_command = "exit"
+            self.write_command()
+            self.notify()
+            return
         else:
             self.write_message("Unknown command, use help to see the possible commands", "red", True)
             self.write_command()
@@ -121,10 +143,6 @@ class TerminalFrame(Frame, Publisher):
         self.terminal.delete("1.0", END)
         self.init_terminal()
         self.terminal.config(state="disabled")
-
-    def new_terminal(self):
-        """Creates a new terminal in the frame"""
-        pass
 
     def copy_text(self):
         """Copy the selected text from the terminal"""

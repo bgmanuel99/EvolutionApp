@@ -3,8 +3,10 @@ from tkinter import *
 from components.frames.topFrame import TopFrame
 from components.frames.bottomFrame import BottomFrame
 from components.menu.rootMenu import RootMenuBar
+from components.interfaces.observer import Observer
+from components.interfaces.publisher import Publisher
 
-class Application(Tk):
+class Application(Tk, Observer):
 
     """Main winfow of the application. It inherits from TK which is the root object of tkinter module to create the GUI"""
 
@@ -27,4 +29,13 @@ class Application(Tk):
         self.bottom_frame.pack(fill=BOTH, padx=3, ipady=3)
 
         self.root_menu_bar.subscribe(self.top_frame.information_frame)
-        self.top_frame.information_frame.terminal_frame.subscribe(self.top_frame.evolution_frame)
+        self.root_menu_bar.subscribe(self.top_frame.elections_frame)
+        self.top_frame.information_frame.terminal_frame.subscribe(self.top_frame.elections_frame)
+        self.top_frame.information_frame.terminal_frame.subscribe(self)
+        self.top_frame.elections_frame.subscribe(self.top_frame.evolution_frame)
+
+    def update(self, Publisher: Publisher, *args) -> None:
+        """Receive the update from the publisher"""
+
+        if args[0] == "exit":
+            self.destroy()

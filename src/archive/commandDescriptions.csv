@@ -1,4 +1,5 @@
-run,Starts the program and the genetic algorithm
+run,Starts the genetic algorithm
+stop,Stops the genetic algorithm
 help,Shows all the possible commands to be executed
 clear,Clears the actual terminal
-new,Creates a new terminal
+exit,Closes the program
