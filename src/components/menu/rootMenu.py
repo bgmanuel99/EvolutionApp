@@ -21,7 +21,7 @@ class RootMenuBar(Menu, Publisher):
         self.file_menu.add_command(label="Save", command=None)
         self.file_menu.add_command(label="Save as...", command=None)
         self.file_menu.add_separator()
-        self.file_menu.add_command(label="Exit", command=root.quit)
+        self.file_menu.add_command(label="Exit", command=root.destroy)
 
         self.edit_menu = Menu(self, tearoff=0)
         self.edit_menu.add_command(label="Copy", command=lambda: self.pre_notify("copy"))

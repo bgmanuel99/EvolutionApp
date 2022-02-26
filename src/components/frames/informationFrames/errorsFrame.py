@@ -1,6 +1,8 @@
 from tkinter import *
+from components.interfaces.observer import Observer
+from components.interfaces.publisher import Publisher
 
-class ErrorsFrame(Frame):
+class ErrorsFrame(Frame, Observer):
 
     """This is the errors terminal from which the user will see all the errors happening in the application while running"""
 
@@ -24,6 +26,12 @@ class ErrorsFrame(Frame):
         self.errors_terminal_scrollbar.config(command=self.errors_terminal.yview)
 
         self.write_message("Evolution App\n", "gray70", True)
+
+    def update(self, publisher: Publisher, *args) -> None:
+        """Receive the update from the publisher"""
+
+        if args[0] == "error":
+            self.write_message(args[1], "red", new_line=True)
 
     def new_line(self):
         """Inserts a new line in the terminal"""
