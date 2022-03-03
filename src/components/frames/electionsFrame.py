@@ -212,7 +212,7 @@ class ElectionsFrame(Frame, Publisher, Observer):
             if self.default_value.get() == 0:
                 data = [int(self.individuals_entry_variable), int(self.food_entry_variable), int(self.epochs_entry_variable)]
             elif self.default_value.get() == 1:
-                data = [10, 5, 10]
+                data = [10, 20, 10]
             for observers in self._observers:
                 observers.update(self, self.type_of_notification, data)
         elif self.type_of_notification == "stop" or self.type_of_notification == "continue" or self.type_of_notification == "restart":
@@ -222,20 +222,22 @@ class ElectionsFrame(Frame, Publisher, Observer):
             for observers in self._observers:
                 observers.update(self, self.type_of_notification, self.error_message)
         elif self.type_of_notification == "default_values":
-            self.type_of_notification = "values"
+            self.type_of_notification = "message"
             for observers in self._observers:
                 observers.update(
                     self, 
                     self.type_of_notification, 
-                    "Using default values to operate in the genetic algorithm:\n\nNumber of individuals   -> 10\nNumber of initial food  ->  5\nNumber of epochs        -> 10"
+                    "Using default values to operate in the genetic algorithm:\n\nNumber of individuals   -> 10\nNumber of initial food  ->  5\nNumber of epochs        -> 10",
+                    ["gray70", 3, 3, False]
                 )
         elif self.type_of_notification == "passed_values":
-            self.type_of_notification = "values"
+            self.type_of_notification = "message"
             for observers in self._observers:
                 observers.update(
                     self,
                     self.type_of_notification,
-                    "Using the passed values on the election panel to operate in the genetic algorithm:\n\nNumber of individuals   -> {}\nNumber of initial food  -> {}\nNumber of epochs        -> {}\n".format(self.individuals_entry_variable, self.food_entry_variable, self.epochs_entry_variable)
+                    "Using the passed values on the election panel to operate in the genetic algorithm:\n\nNumber of individuals   -> {}\nNumber of initial food  -> {}\nNumber of epochs        -> {}\n".format(self.individuals_entry_variable, self.food_entry_variable, self.epochs_entry_variable),
+                    ["gray70", 3, 3, False]
                 )
 
     def update(self, Publisher: Publisher, *args) -> None:

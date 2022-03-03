@@ -1,18 +1,21 @@
-from tkinter import *
 import math
 import random
+from tkinter import *
+from typing import List
 from components.models.gradients import GradientFrame
 from components.interfaces.observer import Observer
 from components.interfaces.publisher import Publisher
 from components.models.species import Species
 
-class EvolutionFrame(Frame, Observer):
+class EvolutionFrame(Frame, Observer, Publisher):
 
     """This is the main application frame. Used to show the genetic algorithm in execution by recreating the species and the environments on it"""
 
     def __init__(self, root):
         Frame.__init__(self, root)
         self.config(bg="dark turquoise")
+
+        self._observers: List[Observer] = []
 
         self.gradient = GradientFrame(self, "magenta4", "RoyalBlue2")
         self.gradient.pack(expand=True, fill=BOTH)
@@ -22,41 +25,81 @@ class EvolutionFrame(Frame, Observer):
         self.evolution_frame.pack(expand=True, fill=BOTH, padx=2, pady=2)
 
         self.execution_status = False
-        self.temp_objects_tags = []
 
         self.species_parameters = {}
         self.species_bodies = {}
         self.food_bodies = {}
 
+        self.type_of_notification = ""
+        self.message = ""
+        self.extra_message_data = []
+
     def update(self, Publisher: Publisher, *args) -> None:
         """Receive the update from the publisher"""
         
         if args[0] == "run": self.initialize(args[1][0], args[1][1], args[1][2])
-        elif args[0] == "stop": self.stop()
-        elif args[0] == "continue": self.run_algorithm()
-        elif args[0] == "restart": self.restart()
+        elif args[0] == "stop":
+            self.stop()
+
+            self.type_of_notification = "message"
+            self.message = "Algorithm stopped"
+            self.extra_message_data = ["gray70", 1, 1, False]
+            self.notify()
+        elif args[0] == "continue":
+            self.run_algorithm()
+
+            self.type_of_notification = "message"
+            self.message = "Cotinuing algorithm execution"
+            self.extra_message_data = ["gray70", 1, 1, False]
+            self.notify()
+        elif args[0] == "restart":
+            self.restart()
+
+            self.type_of_notification = "message"
+            self.message = "Restarting the execution of the algorithm"
+            self.extra_message_data = ["gray70", 1, 2, True]
+            self.notify()
+
+    def subscribe(self, observer: Observer) -> None:
+        """Subscribes an observer to the publisher"""
+
+        self._observers.append(observer)
+
+    def unsubscribe(self, observer: Observer) -> None:
+        """Unsubscribes an observer from the publisher"""
+
+        self._observers.remove(observer)
+
+    def notify(self) -> None:
+        """Notify all observer about an event"""
+
+        if self.type_of_notification == "message":
+            for observers in self._observers:
+                observers.update(self, self.type_of_notification, self.message, self.extra_message_data)
 
     def move_species(self):
         """Continually moves the individuals of the species while the genetics algorithm is running"""
 
-        for tag, species in self.species_bodies.items():
-            if tag not in self.temp_objects_tags:
-                species_velocity = self.species_parameters[tag].velocity
-                self.evolution_frame.move(species, species_velocity[0], species_velocity[1])
+        for tag, species_body in self.species_bodies.items():
+            species_object: Species = self.species_parameters[tag]
+            species_velocity = species_object.velocity
+            self.evolution_frame.move(species_body, species_velocity[0], species_velocity[1])
 
-                if self.wall_collision(species):
-                    self.evolution_frame.delete(tag)
-                    self.temp_objects_tags.append(tag)
+            species_object.movement_time += 10
+            if species_object.movement_time >= species_object.time_to_switch_movement:
+                species_object.movement_time = 0
+                species_object.time_to_switch_movement = random.randint(2000, 3000)
+                species_object.velocity = [
+                    species_velocity[0] * random.choice([-1, 1]), 
+                    species_velocity[1] * random.choice([-1, 1])
+                ]
 
-        """ self.evolution_frame.move(self.oval, 0.5, 0)
-        self.evolution_frame.move(self.oval1, -0.5, 0)
-        if self.wall_collision(self.oval):
-            self.evolution_frame.delete("1")
-            self.execution_status = False
-        if self.species_collision(self.oval, self.oval1):
-            self.evolution_frame.delete("1")
-            self.evolution_frame.delete("3")
-            self.execution_status = False """
+            collision, wall_type = self.wall_collision(species_body)
+            if collision:
+                if wall_type == 0 or wall_type == 2:
+                    species_object.velocity = [species_velocity[0] * -1, species_velocity[1]]
+                elif wall_type == 1 or wall_type == 3:
+                    species_object.velocity = [species_velocity[0], species_velocity[1] * -1]
 
         if self.execution_status: self.evolution_frame.after(10, self.move_species)
 
@@ -64,7 +107,11 @@ class EvolutionFrame(Frame, Observer):
         """Calculates if there is a collision between a wall of the canvas and a species bounds"""
 
         coords = self.evolution_frame.coords(species)
-        if coords[0] < 0 or coords[1] < 0 or coords[2] > 900 or coords[3] > 500: return True
+        if coords[0] < 0: return True, 0
+        elif coords[1] < 0: return True, 1
+        elif coords[2] > 900: return True, 2
+        elif coords[3] > 500: return True, 3
+        return False, 0
 
     def species_collision(self, tag1, tag2):
         """Calculates if there is a collision between two species bounds"""
@@ -83,6 +130,11 @@ class EvolutionFrame(Frame, Observer):
 
     def initialize(self, individuals, food, epochs):
         """Initialize the parameters the genetic algorithm will use"""
+
+        self.type_of_notification = "message"
+        self.message = "Initializing values to start the algorithm..."
+        self.extra_message_data = ["gray70", 0, 0, False]
+        self.notify()
 
         taken_coords = {}
         self.tag_number_for_species = individuals
@@ -141,6 +193,11 @@ class EvolutionFrame(Frame, Observer):
             self.food_bodies["F-"+str(index)] = self.evolution_frame.create_oval(coords[0]-3, coords[1]-3, coords[0]+3, coords[1]+3, fill="green", tags="F-"+str(index))
 
         self.epochs = epochs
+
+        self.type_of_notification = "message"
+        self.message = " Done"
+        self.extra_message_data = ["gray70", 0, 1, False]
+        self.notify()
 
         self.run_algorithm()
 

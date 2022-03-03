@@ -164,12 +164,17 @@ class TerminalFrame(Frame, Publisher):
 
         self.terminal.insert("end", self.clipboard_get())
 
-    def process_message(self, message, color, new_line):
+    def process_message(self, message="", color="gray70", before_lines=0, after_lines=0, new_command=False):
         """This method receives incoming messages from other panels in the application and show them in the terminal"""
         self.terminal.config(state="normal")
-        self.new_line()
-        self.new_line()
-        self.write_message(message, color, new_line)
-        self.new_line()
-        self.write_command()
+        for _ in range(before_lines):
+            self.new_line()
+
+        self.write_message(message, color)
+
+        for _ in range(after_lines):
+            self.new_line()
+
+        if new_command: self.write_command()
+        
         self.terminal.config(state="disabled")
