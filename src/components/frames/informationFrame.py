@@ -76,14 +76,23 @@ class InformationFrame(Frame, Observer):
         self.terminal_methods = {
             "clear": self.terminal_frame.clear_terminal, 
             "copy": self.terminal_frame.copy_text,
-            "paste": self.terminal_frame.paste_text
+            "paste": self.terminal_frame.paste_text,
+            "values": self.terminal_frame.process_message,
+            "error": self.errors_frame.write_message,
+            "warning": self.errors_frame.write_message
         }
 
     def update(self, publisher: RootMenuBar, *args) -> None:
         """Receive the update from the publisher"""
 
-        if args[0] in self.terminal_methods:
+        if args[0] in ["clear", "copy", "paste"]:
             self.terminal_methods[args[0]]()
+        elif args[0] == "values":
+            self.terminal_methods[args[0]](args[1], "gray70", True)
+        elif args[0] == "error":
+            self.terminal_methods[args[0]](args[1], color="red", new_line=True)
+        elif args[0] == "warning":
+            self.terminal_methods[args[0]](args[1], color="yellow", new_line=True)
 
     def focus_terminal(self, event):
         """Change the focus of the information frame to the command terminal"""

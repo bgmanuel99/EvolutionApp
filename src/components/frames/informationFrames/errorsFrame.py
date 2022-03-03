@@ -25,13 +25,7 @@ class ErrorsFrame(Frame, Observer):
         )
         self.errors_terminal_scrollbar.config(command=self.errors_terminal.yview)
 
-        self.write_message("Evolution App\n", "gray70", True)
-
-    def update(self, publisher: Publisher, *args) -> None:
-        """Receive the update from the publisher"""
-
-        if args[0] == "error":
-            self.write_message(args[1], "red", new_line=True)
+        self.write_message("Evolution App\n", "gray70", True)     
 
     def new_line(self):
         """Inserts a new line in the terminal"""

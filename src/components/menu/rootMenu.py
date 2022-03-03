@@ -30,6 +30,8 @@ class RootMenuBar(Menu, Publisher):
         self.run_menu = Menu(self, tearoff=0)
         self.run_menu.add_command(label="Run", command=lambda: self.pre_notify("run"))
         self.run_menu.add_command(label="Stop", command=lambda: self.pre_notify("stop"))
+        self.run_menu.add_command(label="Continue", command=lambda: self.pre_notify("continue"))
+        self.run_menu.add_command(label="Restart", command=lambda: self.pre_notify("restart"))
 
         self.terminal_menu = Menu(self, tearoff=0)
         self.terminal_menu.add_command(label="Clear terminal", command=lambda: self.pre_notify("clear"))

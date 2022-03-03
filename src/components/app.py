@@ -33,7 +33,7 @@ class Application(Tk, Observer):
         self.top_frame.information_frame.terminal_frame.subscribe(self.top_frame.elections_frame)
         self.top_frame.information_frame.terminal_frame.subscribe(self)
         self.top_frame.elections_frame.subscribe(self.top_frame.evolution_frame)
-        self.top_frame.elections_frame.subscribe(self.top_frame.information_frame.errors_frame)
+        self.top_frame.elections_frame.subscribe(self.top_frame.information_frame)
 
     def update(self, Publisher: Publisher, *args) -> None:
         """Receive the update from the publisher"""

@@ -1,6 +1,5 @@
 from tkinter import *
-
-from sklearn.cluster import compute_optics_graph
+from tkinter import messagebox as MessageBox
 from components.models.gradients import GradientFrame
 from components.interfaces.observer import Observer
 from components.interfaces.publisher import Publisher
@@ -35,7 +34,7 @@ class ElectionsFrame(Frame, Publisher, Observer):
         self.restart_button_text.set("Restart")
         self.restart_button = Button(self.options_frame, textvariable=self.restart_button_text, command=self.process_restart_button)
         self.restart_button.place(x=20, y=430, width=260, height=50)
-        self.restart_button.config(font=("Terminal"))
+        self.restart_button.config(font=("Terminal"), state="disabled")
 
         self.individuals_label = Label(self.options_frame, text="Number of individuals:", anchor="w")
         self.individuals_label.place(x=20, y=20, width=120, height=20)
@@ -87,6 +86,11 @@ class ElectionsFrame(Frame, Publisher, Observer):
         if type_of_execution == "run" and self.execution_button_text.get().lower() == "run":
             if self.default_value.get() == 0:
                 if self.fault_of_data(): return
+                else: self.type_of_notification = "passed_values"
+            else: self.type_of_notification = "default_values"
+            self.notify()
+            self.restart_button
+            self.restart_button.config(state="normal")
             self.execution_button_text.set("Stop")
             self.type_of_notification = "run"
             self.notify()
@@ -100,9 +104,19 @@ class ElectionsFrame(Frame, Publisher, Observer):
             self.notify()
 
     def process_restart_button(self):
-        self.execution_button_text.set("Run")
-        self.type_of_notification = "restart"
-        self.notify()
+        """Manage the reinitialization of the genetic algorithm and its values"""
+
+        if self.execution_button_text.get().lower() != "run":
+            result = MessageBox.askokcancel("Ask", "Are you sure")
+            if result:
+                self.restart_button.config(state="disabled")
+                self.execution_button_text.set("Run")
+                self.type_of_notification = "restart"
+                self.notify()
+        else:
+            self.type_of_notification = "warning"
+            self.error_message = "You first have to run the algorithm in order to restart it's values"
+            self.notify()
 
     def fault_of_data(self):
         """
@@ -124,8 +138,10 @@ class ElectionsFrame(Frame, Publisher, Observer):
         return False
 
     def process_default(self):
+        """Disables and enables the insertion of data in the election panel, depending on whether or not the default button is activated."""
+
         if self.default_value.get() == 1:
-            self.individuals_entry.config(state="disable")
+            self.individuals_entry.config(state="disabled")
             self.food_entry.config(state="disabled")
             self.epochs_entry.config(state="disabled")
         elif self.default_value.get() == 0:
@@ -194,7 +210,7 @@ class ElectionsFrame(Frame, Publisher, Observer):
         if self.type_of_notification == "run":
             data = []
             if self.default_value.get() == 0:
-                data = [self.individuals_entry_variable, self.food_entry_variable, self.epochs_entry_variable]
+                data = [int(self.individuals_entry_variable), int(self.food_entry_variable), int(self.epochs_entry_variable)]
             elif self.default_value.get() == 1:
                 data = [10, 5, 10]
             for observers in self._observers:
@@ -202,11 +218,28 @@ class ElectionsFrame(Frame, Publisher, Observer):
         elif self.type_of_notification == "stop" or self.type_of_notification == "continue" or self.type_of_notification == "restart":
             for observers in self._observers:
                 observers.update(self, self.type_of_notification)
-        elif self.type_of_notification == "error":
+        elif self.type_of_notification == "error" or self.type_of_notification == "warning":
             for observers in self._observers:
                 observers.update(self, self.type_of_notification, self.error_message)
+        elif self.type_of_notification == "default_values":
+            self.type_of_notification = "values"
+            for observers in self._observers:
+                observers.update(
+                    self, 
+                    self.type_of_notification, 
+                    "Using default values to operate in the genetic algorithm:\n\nNumber of individuals   -> 10\nNumber of initial food  ->  5\nNumber of epochs        -> 10"
+                )
+        elif self.type_of_notification == "passed_values":
+            self.type_of_notification = "values"
+            for observers in self._observers:
+                observers.update(
+                    self,
+                    self.type_of_notification,
+                    "Using the passed values on the election panel to operate in the genetic algorithm:\n\nNumber of individuals   -> {}\nNumber of initial food  -> {}\nNumber of epochs        -> {}\n".format(self.individuals_entry_variable, self.food_entry_variable, self.epochs_entry_variable)
+                )
 
     def update(self, Publisher: Publisher, *args) -> None:
         """Receive the update from the publisher"""
 
-        self.process_execution_button(args[0])
+        if args[0] in ["run", "stop", "continue"]: self.process_execution_button(args[0])
+        elif args[0] == "restart": self.process_restart_button()

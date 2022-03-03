@@ -86,6 +86,14 @@ class TerminalFrame(Frame, Publisher):
             self.evolution_command = "stop"
             self.write_command()
             self.notify()
+        elif command.lower() == "continue":
+            self.evolution_command = "continue"
+            self.write_command()
+            self.notify()
+        elif command.lower() == "restart":
+            self.evolution_command = "restart"
+            self.write_command()
+            self.notify()
         elif command.lower() == "help":
             self.new_line()
             
@@ -134,6 +142,7 @@ class TerminalFrame(Frame, Publisher):
         """Initialize the command terminal"""
 
         self.write_message("Evolution App\n", "gray70", True)
+        self.write_message("You can type help to see different commands to use in the terminal\n", "gray70", True)
         self.write_command()
 
     def clear_terminal(self):
@@ -154,3 +163,13 @@ class TerminalFrame(Frame, Publisher):
         """Paste text to the terminal"""
 
         self.terminal.insert("end", self.clipboard_get())
+
+    def process_message(self, message, color, new_line):
+        """This method receives incoming messages from other panels in the application and show them in the terminal"""
+        self.terminal.config(state="normal")
+        self.new_line()
+        self.new_line()
+        self.write_message(message, color, new_line)
+        self.new_line()
+        self.write_command()
+        self.terminal.config(state="disabled")

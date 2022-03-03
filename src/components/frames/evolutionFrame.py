@@ -22,6 +22,7 @@ class EvolutionFrame(Frame, Observer):
         self.evolution_frame.pack(expand=True, fill=BOTH, padx=2, pady=2)
 
         self.execution_status = False
+        self.temp_objects_tags = []
 
         self.species_parameters = {}
         self.species_bodies = {}
@@ -30,15 +31,23 @@ class EvolutionFrame(Frame, Observer):
     def update(self, Publisher: Publisher, *args) -> None:
         """Receive the update from the publisher"""
         
-        if args[0] == "run":
-            self.initialize(args[1][0], args[1][1], args[1][2])
+        if args[0] == "run": self.initialize(args[1][0], args[1][1], args[1][2])
         elif args[0] == "stop": self.stop()
         elif args[0] == "continue": self.run_algorithm()
         elif args[0] == "restart": self.restart()
 
     def move_species(self):
         """Continually moves the individuals of the species while the genetics algorithm is running"""
-        
+
+        for tag, species in self.species_bodies.items():
+            if tag not in self.temp_objects_tags:
+                species_velocity = self.species_parameters[tag].velocity
+                self.evolution_frame.move(species, species_velocity[0], species_velocity[1])
+
+                if self.wall_collision(species):
+                    self.evolution_frame.delete(tag)
+                    self.temp_objects_tags.append(tag)
+
         """ self.evolution_frame.move(self.oval, 0.5, 0)
         self.evolution_frame.move(self.oval1, -0.5, 0)
         if self.wall_collision(self.oval):
@@ -65,8 +74,10 @@ class EvolutionFrame(Frame, Observer):
         species2_size = self.species_parameters[tag2].size
 
         distance = math.sqrt(
-            (((species1_coords[0]+species1_size) - (species2_coords[0]+species2_size)) * ((species1_coords[0]+species1_size) - (species2_coords[0]+species2_size))) + 
-            (((species1_coords[1]+species1_size) - (species2_coords[1]+species2_size)) * ((species1_coords[1]+species1_size) - (species2_coords[1]+species2_size))))
+            (((species1_coords[0]+species1_size) - (species2_coords[0]+species2_size)) * 
+            ((species1_coords[0]+species1_size) - (species2_coords[0]+species2_size))) + 
+            (((species1_coords[1]+species1_size) - (species2_coords[1]+species2_size)) * 
+            ((species1_coords[1]+species1_size) - (species2_coords[1]+species2_size))))
 
         if distance < (species1_size + species2_size): return True
 
@@ -79,7 +90,8 @@ class EvolutionFrame(Frame, Observer):
         # Calculate all the species parameters
         for index in range(individuals):
             size = random.randrange(6, 9)
-            velocity = random.uniform(0.5, 0.7)
+            velocity_x = random.uniform(0.5, 0.7) * random.choice([-1, 1])
+            velocity_y = random.uniform(0.5, 0.7) * random.choice([-1, 1])
             
             new_coords = []
             still_collide = True
@@ -91,7 +103,7 @@ class EvolutionFrame(Frame, Observer):
                     if self.initialization_collisions(new_coords, coords, size, self.species_parameters[tag].size): still_collide = True
 
             taken_coords["S-"+str(index)] = new_coords
-            self.species_parameters["S-"+str(index)] = Species(size, velocity)
+            self.species_parameters["S-"+str(index)] = Species(size, [velocity_x, velocity_y])
 
         food_taken_coords = []
 
@@ -154,6 +166,8 @@ class EvolutionFrame(Frame, Observer):
 
     def restart(self):
         """This function restarts the genetic algorithm"""
+
+        self.stop()
 
         for tag in [tag for tag in self.species_bodies]:
             self.evolution_frame.delete(tag)
