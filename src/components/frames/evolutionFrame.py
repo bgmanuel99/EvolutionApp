@@ -37,28 +37,19 @@ class EvolutionFrame(Frame, Observer, Publisher):
     def update(self, Publisher: Publisher, *args) -> None:
         """Receive the update from the publisher"""
         
-        if args[0] == "run": self.initialize(args[1][0], args[1][1], args[1][2])
+        if args[0] == "run":
+            self.prepare_notification("message", "Initializing values to start the algorithm...", ["gray70", 0, 0, False])
+            self.initialize(args[1][0], args[1][1], args[1][2])
+            self.prepare_notification("message", " Done", ["gray70", 0, 1, False])
         elif args[0] == "stop":
             self.stop()
-
-            self.type_of_notification = "message"
-            self.message = "Algorithm stopped"
-            self.extra_message_data = ["gray70", 1, 1, False]
-            self.notify()
+            self.prepare_notification("message", "Algorithm stopped", ["gray70", 1, 1, False])
         elif args[0] == "continue":
             self.run_algorithm()
-
-            self.type_of_notification = "message"
-            self.message = "Cotinuing algorithm execution"
-            self.extra_message_data = ["gray70", 1, 1, False]
-            self.notify()
+            self.prepare_notification("message", "Cotinuing algorithm execution", ["gray70", 1, 1, False])
         elif args[0] == "restart":
             self.restart()
-
-            self.type_of_notification = "message"
-            self.message = "Restarting the execution of the algorithm"
-            self.extra_message_data = ["gray70", 1, 2, True]
-            self.notify()
+            self.prepare_notification("message", "Restarting the execution of the algorithm", ["gray70", 1, 2, True])
 
     def subscribe(self, observer: Observer) -> None:
         """Subscribes an observer to the publisher"""
@@ -131,11 +122,6 @@ class EvolutionFrame(Frame, Observer, Publisher):
     def initialize(self, individuals, food, epochs):
         """Initialize the parameters the genetic algorithm will use"""
 
-        self.type_of_notification = "message"
-        self.message = "Initializing values to start the algorithm..."
-        self.extra_message_data = ["gray70", 0, 0, False]
-        self.notify()
-
         taken_coords = {}
         self.tag_number_for_species = individuals
 
@@ -194,11 +180,6 @@ class EvolutionFrame(Frame, Observer, Publisher):
 
         self.epochs = epochs
 
-        self.type_of_notification = "message"
-        self.message = " Done"
-        self.extra_message_data = ["gray70", 0, 1, False]
-        self.notify()
-
         self.run_algorithm()
 
     def initialization_collisions(self, coords1, coords2, species1_size, species2_size):
@@ -235,3 +216,9 @@ class EvolutionFrame(Frame, Observer, Publisher):
         self.species_parameters = {}
         self.species_bodies = {}
         self.food_bodies = {}
+
+    def prepare_notification(self, type, message, extra):
+        self.type_of_notification = type
+        self.message = message
+        self.extra_message_data = extra
+        self.notify()
