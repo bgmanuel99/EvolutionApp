@@ -69,8 +69,6 @@ class ElectionsFrame(Frame, Publisher, Observer):
         self.epochs_entry.config(foreground="black", font=("Terminal", 11), justify=CENTER)
         self.epochs_entry.bind("<Key>", self.process_epochs_data)
 
-        self.type_of_notification = "stop"
-
         self.default_value = IntVar()
         self.default_values_button = Checkbutton(self.options_frame, variable=self.default_value, onvalue=1, offvalue=0, command=self.process_default)
         self.default_values_button.place(x=17, y=140)
@@ -79,6 +77,12 @@ class ElectionsFrame(Frame, Publisher, Observer):
         self.default_values_label = Label(self.options_frame, text="Default values", anchor="w")
         self.default_values_label.place(x=40, y=140, width=120, height=20)
         self.default_values_label.config(background="gray8", foreground="white", font=("Terminal", 11))
+
+        self.type_of_notification = "stop"
+        self.default_evolution_data = [5, 15, 10]
+        self.min_max_individuals_data = [5, 15]
+        self.min_max_food_data = [10, 60]
+        self.min_max_epochs_data = [5, 100]
 
     def process_execution_button(self, type_of_execution):
         """Manage the execution button, to change the label, initialize the algorithm data in the external file and notify the observer"""
@@ -89,7 +93,6 @@ class ElectionsFrame(Frame, Publisher, Observer):
                 else: self.type_of_notification = "passed_values"
             else: self.type_of_notification = "default_values"
             self.notify()
-            self.restart_button
             self.restart_button.config(state="normal")
             self.execution_button_text.set("Stop")
             self.type_of_notification = "run"
@@ -134,6 +137,18 @@ class ElectionsFrame(Frame, Publisher, Observer):
             self.error_message = "You have inserted wrong data in the elections panel"
             self.notify()
             return True
+        elif self.individuals_entry_variable_status == "num_error" or self.food_entry_variable_status == "num_error" or self.epochs_entry_variable_status == "num_error":
+            self.type_of_notification = "error"
+            self.error_message = "Values for the algorithm should be between:\nIndividuals --> [{}, {}]\nFood --> [{}, {}]\nEpochs --> [{}, {}]".format(
+                self.min_max_individuals_data[0],
+                self.min_max_individuals_data[1],
+                self.min_max_food_data[0],
+                self.min_max_food_data[1],
+                self.min_max_epochs_data[0],
+                self.min_max_epochs_data[1]
+            )
+            self.notify()
+            return True
         
         return False
 
@@ -160,6 +175,9 @@ class ElectionsFrame(Frame, Publisher, Observer):
         if any([char.isalpha() for char in self.individuals_entry_variable]):
             self.individuals_entry.config(foreground="red")
             self.individuals_entry_variable_status = "error"
+        elif self.individuals_entry_variable != "" and (int(self.individuals_entry_variable) < self.min_max_individuals_data[0] or int(self.individuals_entry_variable) > self.min_max_individuals_data[1]):
+            self.individuals_entry.config(foreground="red")
+            self.individuals_entry_variable_status = "num_error"
         else:
             self.individuals_entry.config(foreground="black")
             self.individuals_entry_variable_status = "ok"
@@ -175,6 +193,9 @@ class ElectionsFrame(Frame, Publisher, Observer):
         if any([char.isalpha() for char in self.food_entry_variable]):
             self.food_entry.config(foreground="red")
             self.food_entry_variable_status = "error"
+        elif self.food_entry_variable != "" and (int(self.food_entry_variable) < self.min_max_food_data[0] or int(self.food_entry_variable) > self.min_max_food_data[1]):
+            self.food_entry.config(foreground="red")
+            self.food_entry_variable_status = "num_error"
         else:
             self.food_entry.config(foreground="black")
             self.food_entry_variable_status = "ok"
@@ -190,6 +211,9 @@ class ElectionsFrame(Frame, Publisher, Observer):
         if any([char.isalpha() for char in self.epochs_entry_variable]):
             self.epochs_entry.config(foreground="red")
             self.epochs_entry_variable_status = "error"
+        elif self.epochs_entry_variable != "" and (int(self.epochs_entry_variable) < self.min_max_epochs_data[0] or int(self.epochs_entry_variable) > self.min_max_epochs_data[1]):
+            self.epochs_entry.config(foreground="red")
+            self.epochs_entry_variable_status = "num_error"
         else:
             self.epochs_entry.config(foreground="black")
             self.epochs_entry_variable_status = "ok"
@@ -208,39 +232,35 @@ class ElectionsFrame(Frame, Publisher, Observer):
         """Notify all observer about an event"""
 
         if self.type_of_notification == "run":
-            data = []
+            data = self.default_evolution_data
             if self.default_value.get() == 0:
                 data = [int(self.individuals_entry_variable), int(self.food_entry_variable), int(self.epochs_entry_variable)]
-            elif self.default_value.get() == 1:
-                data = [10, 20, 10]
             for observers in self._observers:
-                observers.update(self, self.type_of_notification, data)
+                observers.update(self.type_of_notification, data)
         elif self.type_of_notification == "stop" or self.type_of_notification == "continue" or self.type_of_notification == "restart":
             for observers in self._observers:
-                observers.update(self, self.type_of_notification)
+                observers.update(self.type_of_notification)
         elif self.type_of_notification == "error" or self.type_of_notification == "warning":
             for observers in self._observers:
-                observers.update(self, self.type_of_notification, self.error_message)
+                observers.update(self.type_of_notification, self.error_message)
         elif self.type_of_notification == "default_values":
             self.type_of_notification = "message"
             for observers in self._observers:
                 observers.update(
-                    self, 
                     self.type_of_notification, 
-                    "Using default values to operate in the genetic algorithm:\n\nNumber of individuals   -> 10\nNumber of initial food  ->  5\nNumber of epochs        -> 10",
+                    "Using default values to operate in the genetic algorithm:\n\nNumber of individuals   -> {}\nNumber of initial food  ->  {}\nNumber of epochs        -> {}".format(self.default_evolution_data[0], self.default_evolution_data[1], self.default_evolution_data[2]),
                     ["gray70", 3, 3, False]
                 )
         elif self.type_of_notification == "passed_values":
             self.type_of_notification = "message"
             for observers in self._observers:
                 observers.update(
-                    self,
                     self.type_of_notification,
                     "Using the passed values on the election panel to operate in the genetic algorithm:\n\nNumber of individuals   -> {}\nNumber of initial food  -> {}\nNumber of epochs        -> {}\n".format(self.individuals_entry_variable, self.food_entry_variable, self.epochs_entry_variable),
                     ["gray70", 3, 3, False]
                 )
 
-    def update(self, Publisher: Publisher, *args) -> None:
+    def update(self, *args) -> None:
         """Receive the update from the publisher"""
 
         if args[0] in ["run", "stop", "continue"]: self.process_execution_button(args[0])

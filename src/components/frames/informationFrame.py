@@ -82,7 +82,7 @@ class InformationFrame(Frame, Observer):
             "warning": self.errors_frame.write_message
         }
 
-    def update(self, publisher: Publisher, *args) -> None:
+    def update(self, *args) -> None:
         """Receive the update from the publisher"""
 
         if args[0] in ["clear", "copy", "paste"]: self.terminal_methods[args[0]]()

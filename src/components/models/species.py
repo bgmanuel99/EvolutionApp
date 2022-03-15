@@ -11,3 +11,19 @@ class Species:
         self.energy = 0
         self.movement_time = 0
         self.time_to_switch_movement = random.randint(2000, 3000)
+        self.food_pieces = 0
+
+    def add_movement_time(self, time):
+        self.movement_time += time
+
+    def restart_movement_time(self):
+        self.movement_time = 0
+
+    def restart_switch_movement_time(self):
+        self.time_to_switch_movement = random.randint(2000, 3000)
+
+    def set_velocity(self, velocity):
+        self.velocity = velocity
+
+    def add_piece(self):
+        self.food_pieces += 1

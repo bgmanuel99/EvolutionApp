@@ -70,4 +70,4 @@ class RootMenuBar(Menu, Publisher):
         """Notify all observer about an event"""
 
         for observers in self._observers:
-            observers.update(self, self.pressed_command)
+            observers.update(self.pressed_command)

@@ -1,8 +1,6 @@
 from tkinter import *
-from components.interfaces.observer import Observer
-from components.interfaces.publisher import Publisher
 
-class ErrorsFrame(Frame, Observer):
+class ErrorsFrame(Frame):
 
     """This is the errors terminal from which the user will see all the errors happening in the application while running"""
 

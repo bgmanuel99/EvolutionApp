@@ -55,7 +55,7 @@ class TerminalFrame(Frame, Publisher):
         """Notify all observer about an event"""
         
         for observers in self._observers:
-            observers.update(self, self.evolution_command)
+            observers.update(self.evolution_command)
 
     def write_command(self):
         """Inserts a new line for the user to introduce the next command"""
@@ -166,7 +166,9 @@ class TerminalFrame(Frame, Publisher):
 
     def process_message(self, message="", color="gray70", before_lines=0, after_lines=0, new_command=False):
         """This method receives incoming messages from other panels in the application and show them in the terminal"""
+
         self.terminal.config(state="normal")
+        
         for _ in range(before_lines):
             self.new_line()
 
