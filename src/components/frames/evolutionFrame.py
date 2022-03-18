@@ -30,6 +30,7 @@ class EvolutionFrame(Frame, Observer, Publisher):
         self.species_parameters = {}
         self.species_bodies = {}
         self.food_bodies = {}
+        self.food_size = 5
 
         self.type_of_notification = ""
         self.message = ""
@@ -125,7 +126,7 @@ class EvolutionFrame(Frame, Observer, Publisher):
 
         if self.execution_status:
             if self.all_threads_finished == len(self.species_bodies):
-                if self.time_of_actual_epoch == 10000: self.process_next_epoch(self.actual_epoch == self.epochs)
+                if self.time_of_actual_epoch == 20000: self.process_next_epoch(self.actual_epoch == self.epochs)
                 self.time_of_actual_epoch += 10
 
                 for food_tag in self.temp_food_tags:
@@ -133,6 +134,7 @@ class EvolutionFrame(Frame, Observer, Publisher):
                     del(self.food_bodies[food_tag])
                     self.evolution_frame.delete(food_tag)
 
+                self.temp_food_tags = []
                 self.all_threads_finished = 0
                 thread_num = 0
 
@@ -166,17 +168,95 @@ class EvolutionFrame(Frame, Observer, Publisher):
 
         # Evaluate which of the individuals should survive and reproduce to the next epoch
         reproduce_individuals = self.evaluate()
+
+        # Delete the resting food on the terrain
+        for food in self.food_bodies.keys():
+            self.evolution_frame.delete(food)
+        self.food_bodies = {}
+
+        # Create new individuals for the next epoch
+        # Firstly the new coords for the individuals must be calculated
+        taken_coords = {}
+        for tag, species in self.species_bodies.items():
+            species_parameters: Species = self.species_parameters[tag]
+            species_coords = self.evolution_frame.coords(species)
+            taken_coords[tag] = [species_coords[0]+species_parameters.size, species_coords[1]+species_parameters.size]
+
+        new_species_parameter_tags = []
+        for individual in reproduce_individuals:
+            self.tag_number_for_species += 1
+            size = self.mutate_size(self.species_parameters[individual].size)
+            velocity = self.mutate_velocity(self.species_parameters[individual].velocity)
+            
+            new_coords = []
+            still_collide = True
+            while(still_collide):
+                still_collide = False
+                new_coords = [random.randrange(20, 881), random.randrange(20, 481)]
+
+                for tag, coords in taken_coords.items():
+                    if self.initialization_collisions(new_coords, coords, size, self.species_parameters[tag].size): still_collide = True
+                
+            taken_coords["S-"+str(self.tag_number_for_species)] = new_coords
+            self.species_parameters["S-"+str(self.tag_number_for_species)] = Species(size, velocity)
+            new_species_parameter_tags.append("S-"+str(self.tag_number_for_species))
+
+        food_taken_coords = []
+
+        # Calculate the new food coords
+        for _ in range(self.number_of_food):
+            new_coords = []
+            still_collide = True
+            while(still_collide):
+                still_collide = False
+                new_coords = [random.randrange(20, 881), random.randrange(20, 481)]
+
+                for tag, coords in taken_coords.items():
+                    if self.initialization_collisions(new_coords, coords, self.food_size, self.species_parameters[tag].size): still_collide = True
+
+                for coords in food_taken_coords:
+                    if self.initialization_collisions(new_coords, coords, self.food_size, self.food_size): still_collide = True
+            
+            food_taken_coords.append(new_coords)
+
+        # Introduce new individuals
+        for tag in new_species_parameter_tags:
+            self.species_bodies[str(tag)] = self.evolution_frame.create_oval(
+                taken_coords[tag][0]-self.species_parameters[tag].size, 
+                taken_coords[tag][1]-self.species_parameters[tag].size, 
+                taken_coords[tag][0]+self.species_parameters[tag].size, 
+                taken_coords[tag][1]+self.species_parameters[tag].size, 
+                fill="blue", 
+                tags=str(tag)
+            )
+
+        # Introduce new food
+        for index in range(len(food_taken_coords)):
+            self.food_bodies["F-"+str(index)] = self.evolution_frame.create_oval(
+                food_taken_coords[index][0]-self.food_size, 
+                food_taken_coords[index][1]-self.food_size, 
+                food_taken_coords[index][0]+self.food_size, 
+                food_taken_coords[index][1]+self.food_size, 
+                fill="green", 
+                tags="F-"+str(index)
+            )
     
     def evaluate(self):
-        """This function will evaluate which individuals should reproduce or die"""
+        """
+        This function will evaluate which individuals should reproduce or die.
+        The ones who shall die, because did'nt get any food, will be erased.
+        The ones to reproduce will be passed as a return of the function.
+        """
 
         delete_species_tags = []
         reproduce_species_tags = []
 
         for tag, species in self.species_parameters.items():
             if species.food_pieces == 0: delete_species_tags.append(tag)
-            elif species.food_pieces == 1: continue
-            elif species.food_pieces == 2: reproduce_species_tags.append(tag)
+            elif species.food_pieces == 1: species.food_pieces = 0
+            elif species.food_pieces == 2: 
+                species.food_pieces = 0
+                reproduce_species_tags.append(tag)
 
         for tag in delete_species_tags:
             del(self.species_bodies[tag])
@@ -185,8 +265,17 @@ class EvolutionFrame(Frame, Observer, Publisher):
         
         return reproduce_species_tags
 
-    def mutation(self):
-        pass
+    def mutate_size(self, size):
+        new_size = size + random.choice([-1, 1])
+        if new_size < 6 or new_size > 12: return size
+        return new_size
+
+    def mutate_velocity(self, velocity):
+        new_velocity_x = velocity[0] + round(random.uniform(0.05, 0.1), 2) * random.choice([-1, 1])
+        new_velocity_y = velocity[1] + round(random.uniform(0.05, 0.1), 2) * random.choice([-1, 1])
+        if new_velocity_x < 0.5 or new_velocity_x > 1: new_velocity_x = velocity[0]
+        if new_velocity_y < 0.5 or new_velocity_y > 1: new_velocity_y = velocity[1]
+        return [new_velocity_x, new_velocity_y]
 
     def wall_collision(self, species):
         """Calculates if there is a collision between a wall of the canvas and a species bounds"""
@@ -206,11 +295,11 @@ class EvolutionFrame(Frame, Observer, Publisher):
         food_coords = self.evolution_frame.coords(food)
 
         distance = math.sqrt(
-            (((species_coords[0]+species_size) - (food_coords[0]+3)) * ((species_coords[0]+species_size) - (food_coords[0]+3))) + 
-            (((species_coords[1]+species_size) - (food_coords[1]+3)) * ((species_coords[1]+species_size) - (food_coords[1]+3)))
+            (((species_coords[0]+species_size) - (food_coords[0]+self.food_size)) * ((species_coords[0]+species_size) - (food_coords[0]+self.food_size))) + 
+            (((species_coords[1]+species_size) - (food_coords[1]+self.food_size)) * ((species_coords[1]+species_size) - (food_coords[1]+self.food_size)))
         )
 
-        if distance < (species_size + 3): return True
+        if distance < (species_size + self.food_size): return True
         return False
 
     def initialize(self, individuals, food, epochs):
@@ -238,9 +327,10 @@ class EvolutionFrame(Frame, Observer, Publisher):
             self.species_parameters["S-"+str(index)] = Species(size, [velocity_x, velocity_y])
 
         food_taken_coords = []
+        self.number_of_food = food
 
         # Calculate food coordinates
-        for index in range(food):
+        for _ in range(food):
             new_coords = []
             still_collide = True
             while(still_collide):
@@ -248,29 +338,34 @@ class EvolutionFrame(Frame, Observer, Publisher):
                 new_coords = [random.randrange(20, 881), random.randrange(20, 481)]
 
                 for tag, coords in taken_coords.items():
-                    if self.initialization_collisions(new_coords, coords, 3, self.species_parameters[tag].size): still_collide = True
+                    if self.initialization_collisions(new_coords, coords, self.food_size, self.species_parameters[tag].size): still_collide = True
 
                 for coords in food_taken_coords:
-                    if self.initialization_collisions(new_coords, coords, 3, 3): still_collide = True
+                    if self.initialization_collisions(new_coords, coords, self.food_size, self.food_size): still_collide = True
             
             food_taken_coords.append(new_coords)
 
         # Create the species and draw them in the canvas
         for tag, species in self.species_parameters.items():
-            species_coords = taken_coords[tag]
             self.species_bodies[str(tag)] = self.evolution_frame.create_oval(
-                species_coords[0]-species.size, 
-                species_coords[1]-species.size, 
-                species_coords[0]+species.size, 
-                species_coords[1]+species.size, 
+                taken_coords[tag][0]-species.size, 
+                taken_coords[tag][1]-species.size, 
+                taken_coords[tag][0]+species.size, 
+                taken_coords[tag][1]+species.size, 
                 fill="blue", 
                 tags=str(tag)
             )
 
         # Create the food and draw them in the canvas
         for index in range(len(food_taken_coords)):
-            coords = food_taken_coords[index]
-            self.food_bodies["F-"+str(index)] = self.evolution_frame.create_oval(coords[0]-3, coords[1]-3, coords[0]+3, coords[1]+3, fill="green", tags="F-"+str(index))
+            self.food_bodies["F-"+str(index)] = self.evolution_frame.create_oval(
+                food_taken_coords[index][0]-self.food_size, 
+                food_taken_coords[index][1]-self.food_size, 
+                food_taken_coords[index][0]+self.food_size, 
+                food_taken_coords[index][1]+self.food_size, 
+                fill="green", 
+                tags="F-"+str(index)
+            )
 
         self.epochs = epochs
 
@@ -315,6 +410,8 @@ class EvolutionFrame(Frame, Observer, Publisher):
             self.species_parameters = {}
             self.species_bodies = {}
             self.food_bodies = {}
+
+            self.time_of_actual_epoch = 0
         else: self.after(1, self.restart)
 
     def prepare_notification(self, type, message, extra):
