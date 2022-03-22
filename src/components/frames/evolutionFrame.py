@@ -170,8 +170,7 @@ class EvolutionFrame(Frame, Observer, Publisher):
         reproduce_individuals = self.evaluate()
 
         # Delete the resting food on the terrain
-        for food in self.food_bodies.keys():
-            self.evolution_frame.delete(food)
+        for food in self.food_bodies.keys(): self.evolution_frame.delete(food)
         self.food_bodies = {}
 
         # Create new individuals for the next epoch
@@ -266,11 +265,13 @@ class EvolutionFrame(Frame, Observer, Publisher):
         return reproduce_species_tags
 
     def mutate_size(self, size):
+        """This method will slightly mutate the size of each new individual inserted for the genetic algorithm"""
         new_size = size + random.choice([-1, 1])
         if new_size < 6 or new_size > 12: return size
         return new_size
 
     def mutate_velocity(self, velocity):
+        """This method will slightly mutate the velocity of each new individual inserted for the genetic algorithm"""
         new_velocity_x = velocity[0] + round(random.uniform(0.05, 0.1), 2) * random.choice([-1, 1])
         new_velocity_y = velocity[1] + round(random.uniform(0.05, 0.1), 2) * random.choice([-1, 1])
         if new_velocity_x < 0.5 or new_velocity_x > 1: new_velocity_x = velocity[0]
@@ -281,10 +282,10 @@ class EvolutionFrame(Frame, Observer, Publisher):
         """Calculates if there is a collision between a wall of the canvas and a species bounds"""
 
         coords = self.evolution_frame.coords(species)
-        if coords[0] < 0: return True, 0
-        elif coords[1] < 0: return True, 1
-        elif coords[2] > 900: return True, 2
-        elif coords[3] > 500: return True, 3
+        if coords[0] < 2: return True, 0
+        elif coords[1] < 2: return True, 1
+        elif coords[2] > 897: return True, 2
+        elif coords[3] > 497: return True, 3
         return False, 0
 
     def species_and_food_collision(self, species_tag, food):
