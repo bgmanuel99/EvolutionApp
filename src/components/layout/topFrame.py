@@ -1,8 +1,8 @@
 from tkinter import *
-from components.frames.evolutionFrame import EvolutionFrame
-from components.frames.electionsFrame import ElectionsFrame
-from components.frames.informationFrame import InformationFrame
-from components.frames.environmentFrame import EnvironmentFrame
+from components.layout.evolutionFrame import EvolutionFrame
+from components.layout.electionsFrame import ElectionsFrame
+from components.layout.informationFrame import InformationFrame
+from components.layout.environmentFrame import EnvironmentFrame
 
 class TopFrame(Frame):
 

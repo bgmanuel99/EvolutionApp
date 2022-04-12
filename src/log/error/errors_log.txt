@@ -1,0 +1,7 @@
+12/04/2022 20:30:05 [WARNING/INFO] The creation of a report log for the algorithm was activated but no path was provided / The application won't create the report
+12/04/2022 20:45:46 [WARNING] You cannot use the environment buttons when the algorithm is already running
+12/04/2022 20:45:46 [WARNING] You cannot use the environment buttons when the algorithm is already running
+12/04/2022 20:45:46 [WARNING] You cannot use the environment buttons when the algorithm is already running
+12/04/2022 20:45:49 [WARNING] You cannot change the default values nor the create report log status while the algorithm is running
+12/04/2022 20:45:51 [WARNING] You cannot change the default values nor the create report log status while the algorithm is running
+12/04/2022 21:36:17 [WARNING/INFO] The creation of a report log for the algorithm was activated but no path was provided / The application won't create the report

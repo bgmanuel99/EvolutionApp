@@ -38,3 +38,10 @@ class GradientFrame(Canvas):
             self.create_line(0, i, width, i, tags=("gradient",), fill=color)
             
         self.lower("gradient")
+
+    def set_new_colors(self, color1, color2):
+        """Setter method for attribute color1 and color2"""
+
+        self.color1 = color1
+        self.color2 = color2
+        self.draw_gradient()

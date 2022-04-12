@@ -1,10 +1,9 @@
 from tkinter import *
-from components.frames.informationFrames.characteristicsFrame import CharacteristicsFrame
-from components.frames.informationFrames.errorsFrame import ErrorsFrame
-from components.frames.informationFrames.terminalFrame import TerminalFrame
+from components.layout.informationFrames.characteristicsFrame import CharacteristicsFrame
+from components.layout.informationFrames.errorsFrame import ErrorsFrame
+from components.layout.informationFrames.terminalFrame import TerminalFrame
 from components.models.gradients import GradientFrame
 from components.interfaces.observer import Observer
-from components.interfaces.publisher import Publisher
 
 class InformationFrame(Frame, Observer):
 
@@ -19,7 +18,7 @@ class InformationFrame(Frame, Observer):
         Frame.__init__(self, root)
         self.config(bg="dark turquoise")
 
-        self.gradient = GradientFrame(self, "RoyalBlue2", "magenta4")
+        self.gradient = GradientFrame(self, "OliveDrab1", "SpringGreen4")
         self.gradient.pack()
         self.gradient.config(bd=0, highlightthickness=0, relief='ridge')
 
@@ -56,7 +55,7 @@ class InformationFrame(Frame, Observer):
         self.characteristics_election_frame = Frame(self.panel_of_elections)
         self.characteristics_election_frame.pack(side=LEFT, anchor=W, padx=(1, 6), pady=(4, 6))
         self.characteristics_election_label = Label(self.characteristics_election_frame, text="CHARACTERISTICS")
-        self.characteristics_election_label.pack()
+        self.characteristics_election_label.pack(side=TOP)
         self.characteristics_election_label.config(background="gray8", foreground="gray50", font=("Terminal", 11))
         self.characteristics_election_focus = Frame(self.characteristics_election_frame, height=2)
         self.characteristics_election_focus.pack(fill=BOTH)
@@ -78,8 +77,14 @@ class InformationFrame(Frame, Observer):
             "copy": self.terminal_frame.copy_text,
             "paste": self.terminal_frame.paste_text,
             "message": self.terminal_frame.process_message,
-            "error": self.errors_frame.write_message,
-            "warning": self.errors_frame.write_message
+            "error": self.errors_frame.write_error,
+            "warning": self.errors_frame.write_warning,
+            "info": self.errors_frame.write_info,
+            "terminal_status": self.terminal_frame.switch_terminal_status,
+            "update_characteristics_data": self.characteristics_frame.update_data,
+            "update_time": self.characteristics_frame.update_algorithm_time_of_execution,
+            "update_epoch_time": self.characteristics_frame.update_epoch_time_of_execution,
+            "execution_failed": self.terminal_frame.write_command,
         }
 
     def update(self, *args) -> None:
@@ -87,8 +92,25 @@ class InformationFrame(Frame, Observer):
 
         if args[0] in ["clear", "copy", "paste"]: self.terminal_methods[args[0]]()
         elif args[0] == "message": self.terminal_methods[args[0]](args[1], args[2][0], args[2][1], args[2][2], args[2][3])
-        elif args[0] == "error": self.terminal_methods[args[0]](args[1], color="red", new_line=True)
-        elif args[0] == "warning": self.terminal_methods[args[0]](args[1], color="yellow", new_line=True)
+        elif args[0] == "error" or args[0] == "warning" or args[0] == "info": self.terminal_methods[args[0]](args[1], args[2][0], args[2][1])
+        elif args[0] == "terminal_status": self.terminal_methods[args[0]](args[1])
+        elif args[0] == "update_characteristics_data": self.terminal_methods[args[0]](args[1])
+        elif args[0] == "change_environment":
+            if args[1] == "polar":
+                self.gradient.set_new_colors("RoyalBlue2", "magenta4")
+                self.terminal_frame.process_message("ACTIVE ENVIRONMENT --> ", "gray70", 2, 0, False)
+                self.terminal_frame.process_message("POLAR", "OliveDrab1", 0, 2, True)
+            elif args[1] == "mediterranean":
+                self.gradient.set_new_colors("OliveDrab1", "SpringGreen4")
+                self.terminal_frame.process_message("ACTIVE ENVIRONMENT --> ", "gray70", 2, 0, False)
+                self.terminal_frame.process_message("MEDITERRANEAN", "OliveDrab1", 0, 2, True)
+            elif args[1] == "desert":
+                self.gradient.set_new_colors("goldenrod1", "brown")
+                self.terminal_frame.process_message("ACTIVE ENVIRONMENT --> ", "gray70", 2, 0, False)
+                self.terminal_frame.process_message("DESERT", "OliveDrab1", 0, 2, True)
+        elif args[0] == "update_time": self.terminal_methods[args[0]](args[1], args[2])
+        elif args[0] == "update_epoch_time": self.terminal_methods[args[0]](args[1], args[2])
+        elif args[0] == "execution_failed": self.terminal_methods[args[0]]()
 
     def focus_terminal(self, event):
         """Change the focus of the information frame to the command terminal"""

@@ -35,11 +35,12 @@ class TerminalFrame(Frame, Publisher):
         )
         self.terminal_scrollbar.config(command=self.terminal.yview)
         self.terminal.bind("<Return>", self.proccess_command)
-        self.terminal.bind("<Button-1>", lambda event: self.terminal.config(state="normal"))
+        self.terminal.bind("<Button-1>", self.process_pressed_terminal)
         self.init_terminal()
         self.terminal.config(state="disabled")
 
         self.evolution_command = ""
+        self.modifiable_terminal = True
 
     def subscribe(self, observer: Observer) -> None:
         """Subscribes an observer to the publisher"""
@@ -80,7 +81,6 @@ class TerminalFrame(Frame, Publisher):
 
         if command.lower() == "run":
             self.evolution_command = "run"
-            self.write_command()
             self.notify()
         elif command.lower() == "stop":
             self.evolution_command = "stop"
@@ -121,6 +121,11 @@ class TerminalFrame(Frame, Publisher):
         # The break lines will be managed with the write_message and new_line functions
         self.terminal.config(state="disabled")
 
+    def process_pressed_terminal(self, event):
+        """Process whenever the terminal is clicked with the left button of the mouse"""
+
+        if self.modifiable_terminal: self.terminal.config(state="normal")
+
     def new_line(self):
         """Inserts a new line in the terminal"""
 
@@ -133,6 +138,9 @@ class TerminalFrame(Frame, Publisher):
 
         self.terminal.insert("end", "{}{}".format(message, "\n" if new_line else ""), color)
 
+        # Move the view of the terminal to the bottom each time something new is write in it
+        self.terminal.yview_moveto("1.0")
+
     def tag_configure(self, color):
         """Inserts a new color into de configuration of the terminal so it can be used as a tag"""
 
@@ -142,16 +150,17 @@ class TerminalFrame(Frame, Publisher):
         """Initialize the command terminal"""
 
         self.write_message("Evolution App\n", "gray70", True)
-        self.write_message("You can type help to see different commands to use in the terminal\n", "gray70", True)
+        self.write_message("You can type help to see the available commands to use in the terminal\n", "gray70", True)
         self.write_command()
 
     def clear_terminal(self):
         """Clears the actual terminal"""
 
-        self.terminal.config(state="normal")
-        self.terminal.delete("1.0", END)
-        self.init_terminal()
-        self.terminal.config(state="disabled")
+        if self.modifiable_terminal:
+            self.terminal.config(state="normal")
+            self.terminal.delete("1.0", END)
+            self.init_terminal()
+            self.terminal.config(state="disabled")
 
     def copy_text(self):
         """Copy the selected text from the terminal"""
@@ -180,3 +189,8 @@ class TerminalFrame(Frame, Publisher):
         if new_command: self.write_command()
         
         self.terminal.config(state="disabled")
+
+    def switch_terminal_status(self, status):
+        """Sets the status for the terminal in order for it to be modifiable or not"""
+
+        self.modifiable_terminal = status

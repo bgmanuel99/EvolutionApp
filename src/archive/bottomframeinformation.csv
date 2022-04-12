@@ -1,0 +1,13 @@
+"end","\n\n------------------\n", "springgreen"
+"end","|", "springgreen"
+"end","  BOTTOM FRAME  ", "OliveDrab1"
+"end","|\n", "springgreen"
+"end","------------------\n\n\n", "springgreen"
+"center",,
+"end","This is the last of the main three 'top frame' of the application. This frame displays the ", "gray70"
+"end","name", "OliveDrab1"
+"end"," of the application, it's ", "gray70"
+"end","version", "OliveDrab1"
+"end"," and the ", "gray70"
+"end","time", "OliveDrab1"
+"end",".", "gray70"
