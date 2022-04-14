@@ -35,6 +35,8 @@ class EvolutionFrame(Frame, Observer, Publisher):
         self.species_parameters = {}
         self.species_bodies = {}
         self.species_color_by_velocity = {
+            "0.3": "gray5",
+            "0.4": "midnight blue",
             "0.5": "navy",
             "0.6": "medium blue",
             "0.7": "blue",
@@ -211,8 +213,8 @@ class EvolutionFrame(Frame, Observer, Publisher):
                 self.gradient.set_new_colors("magenta4", "RoyalBlue2")
                 self.evolution_frame.config(bg="light sky blue")
                 self.needed_food_to_survive_and_evolve = [2, 3]
-                self.velocity_initializing_values = [0.4, 0.6]
-                self.velocity_limits = [0.3, 0.7]
+                self.velocity_initializing_values = [0.3, 0.5]
+                self.velocity_limits = [0.3, 0.8]
             elif args[1] == "mediterranean":
                 self.gradient.set_new_colors("SpringGreen4", "OliveDrab1")
                 self.evolution_frame.config(bg="pale green")
@@ -279,6 +281,7 @@ class EvolutionFrame(Frame, Observer, Publisher):
                 if food_collision_response:
                     species_object.add_piece()
                     if species_object.food_pieces == self.needed_food_to_survive_and_evolve[0]:
+                        print("got", species_object.food_pieces)
                         self.prepare_characteristics_notification(
                             number_of_non_survival_individuals=self.calculations_characteristics_data["number_of_non_survival_individuals"] - 1
                         )
@@ -579,7 +582,7 @@ class EvolutionFrame(Frame, Observer, Publisher):
         reproduce_species_tags = []
 
         for tag, species in self.species_parameters.items():
-            if species.food_pieces == 0: delete_species_tags.append(tag)
+            if species.food_pieces < self.needed_food_to_survive_and_evolve[0]: delete_species_tags.append(tag)
             elif species.food_pieces == self.needed_food_to_survive_and_evolve[0]: species.food_pieces = 0
             elif species.food_pieces == self.needed_food_to_survive_and_evolve[1]: 
                 species.food_pieces = 0
@@ -589,7 +592,7 @@ class EvolutionFrame(Frame, Observer, Publisher):
             del(self.species_bodies[tag])
             del(self.species_parameters[tag])
             self.evolution_frame.delete(tag)
-        
+
         return reproduce_species_tags
 
     def mutate_size(self, size):
