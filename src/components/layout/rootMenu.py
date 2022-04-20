@@ -31,7 +31,7 @@ class RootMenuBar(Menu, Publisher, Observer):
         self.file_menu.add_separator()
         self.file_menu.add_command(label="Volume", command=self.volume_popup)
         self.file_menu.add_separator()
-        self.file_menu.add_command(label="Exit", command=root.destroy)
+        self.file_menu.add_command(label="Exit", command=lambda: self.pre_notify("exit"))
 
         # Edit menu commands
         self.edit_menu = Menu(self, tearoff=0)
@@ -99,7 +99,7 @@ class RootMenuBar(Menu, Publisher, Observer):
     def notify(self) -> None:
         """Notify all observer about an event"""
 
-        if self.pressed_command in ["copy", "paste", "run", "stop", "continue", "restart", "clear", "polar", "mediterranean", "desert"]:
+        if self.pressed_command in ["exit", "copy", "paste", "run", "stop", "continue", "restart", "clear", "polar", "mediterranean", "desert"]:
             for observers in self._observers:
                 observers.update(self.pressed_command)
 
@@ -110,17 +110,20 @@ class RootMenuBar(Menu, Publisher, Observer):
             if args[1] == "polar":
                 self.help_gradient_colors = ["magenta4", "RoyalBlue2"]
                 self.about_gradient_colors = ["magenta4", "RoyalBlue2"]
+                self.volume_gradient_colors = ["magenta4", "RoyalBlue2"]
                 if self.search_gradient: self.search_gradient.set_new_colors("magenta4", "RoyalBlue2")
                 if self.information_gradient: self.information_gradient.set_new_colors("magenta4", "RoyalBlue2")
                 if self.volume_gradient: self.volume_gradient.set_new_colors("magenta4", "RoyalBlue2")
             elif args[1] == "mediterranean":
                 self.help_gradient_colors = ["SpringGreen4", "OliveDrab1"]
                 self.about_gradient_colors = ["SpringGreen4", "OliveDrab1"]
+                self.volume_gradient_colors = ["SpringGreen4", "OliveDrab1"]
                 if self.search_gradient: self.search_gradient.set_new_colors("SpringGreen4", "OliveDrab1")
                 if self.information_gradient: self.information_gradient.set_new_colors("SpringGreen4", "OliveDrab1")
                 if self.volume_gradient: self.volume_gradient.set_new_colors("SpringGreen4", "OliveDrab1")
             elif args[1] == "desert":
                 self.help_gradient_colors = ["brown", "goldenrod1"]
+                self.about_gradient_colors = ["brown", "goldenrod1"]
                 self.about_gradient_colors = ["brown", "goldenrod1"]
                 if self.search_gradient: self.search_gradient.set_new_colors("brown", "goldenrod1")
                 if self.information_gradient: self.information_gradient.set_new_colors("brown", "goldenrod1")

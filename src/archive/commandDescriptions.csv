@@ -1,7 +1,6 @@
 run,Starts the execution of the genetic algorithm
-stop,Stops the execution of the genetic algorithm
-continue,Continues the execution of the genetic algorithm
-restart,Stops the execution of the genetic algorithm and restarts all the values
+set, Sets a default path for the evolution report log --> set "path_to_the_directory/*.txt"
+unset, Unsets the stored default path
 help,Shows all the possible commands to be executed
 clear,Clears the actual terminal
 exit,Closes the program

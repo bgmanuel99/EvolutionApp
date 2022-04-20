@@ -33,55 +33,55 @@ class ElectionsFrame(Frame, Publisher, Observer):
         self.individuals_label.place(x=20, y=20, width=120, height=20)
         self.individuals_label.config(background="gray8", foreground="white", font=("Terminal", 11))
 
-        self.individuals_entry_variable = ""
         self.individuals_entry_variable_status = ""
-        self.individuals_entry = Entry(self.options_frame, textvariable=self.individuals_entry_variable)
+        self.individuals_entry = Entry(self.options_frame)
         self.individuals_entry.place(x=160, y=20, width=120, height=20)
         self.individuals_entry.config(foreground="black", font=("Terminal", 11), justify=CENTER)
-        self.individuals_entry.bind("<Key>", self.process_individuals_data)
+        self.individuals_entry.bind("<Key>", self.process_individuals_data_update)
+        self.individuals_entry.bind("<KeyRelease>", self.process_individuals_data)
 
         self.food_label = Label(self.options_frame, text="Initial food per epoch:", anchor="w")
         self.food_label.place(x=20, y=60, width=120, height=20)
         self.food_label.config(background="gray8", foreground="white", font=("Terminal", 11))
 
-        self.food_entry_variable = ""
         self.food_entry_variable_status = ""
-        self.food_entry = Entry(self.options_frame, textvariable=self.food_entry_variable)
+        self.food_entry = Entry(self.options_frame)
         self.food_entry.place(x=160, y=60, width=120, height=20)
         self.food_entry.config(foreground="black", font=("Terminal", 11), justify=CENTER)
-        self.food_entry.bind("<Key>", self.process_food_data)
+        self.food_entry.bind("<Key>", self.process_food_data_update)
+        self.food_entry.bind("<KeyRelease>", self.process_food_data)
 
         self.epochs_label = Label(self.options_frame, text="Number of epochs:", anchor="w")
         self.epochs_label.place(x=20, y=100, width=120, height=20)
         self.epochs_label.config(background="gray8", foreground="white", font=("Terminal", 11))
 
-        self.epochs_entry_variable = ""
         self.epochs_entry_variable_status = ""
-        self.epochs_entry = Entry(self.options_frame, textvariable=self.epochs_entry_variable)
+        self.epochs_entry = Entry(self.options_frame)
         self.epochs_entry.place(x=160, y=100, width=120, height=20)
         self.epochs_entry.config(foreground="black", font=("Terminal", 11), justify=CENTER)
-        self.epochs_entry.bind("<Key>", self.process_epochs_data)
+        self.epochs_entry.bind("<Key>", self.process_epochs_data_update)
+        self.epochs_entry.bind("<KeyRelease>", self.process_epochs_data)
 
         self.default_value = IntVar()
         self.default_values_button = Checkbutton(self.options_frame, variable=self.default_value, onvalue=1, offvalue=0, command=self.process_default)
-        self.default_values_button.place(x=17, y=140)
+        self.default_values_button.place(x=17, y=145)
         self.default_values_button.config(background="gray8", foreground="black", font=("Terminal", 11))
         self.default_values_button.bind("<Enter>", lambda event: self.default_values_button.config(cursor="hand2"))
         self.default_values_button.bind("<Button-1>", self.play_default_values_checkbutton_sound)
 
         self.default_values_label = Label(self.options_frame, text="Default values", anchor="w")
-        self.default_values_label.place(x=40, y=140, width=80, height=20)
+        self.default_values_label.place(x=40, y=145, width=80, height=20)
         self.default_values_label.config(background="gray8", foreground="white", font=("Terminal", 11))
 
         self.evolution_report_log_value = IntVar()
         self.evolution_report_log_checkbutton = Checkbutton(self.options_frame, variable=self.evolution_report_log_value, onvalue=1, offvalue=0, command=self.process_report_log)
-        self.evolution_report_log_checkbutton.place(x=155, y=140)
+        self.evolution_report_log_checkbutton.place(x=155, y=145)
         self.evolution_report_log_checkbutton.config(background="gray8", foreground="black", font=("Terminal", 11))
         self.evolution_report_log_checkbutton.bind("<Enter>", lambda event: self.evolution_report_log_checkbutton.config(cursor="hand2"))
         self.evolution_report_log_checkbutton.bind("<Button-1>", self.play_default_values_checkbutton_sound)
 
         self.evolution_report_log_label = Label(self.options_frame, text="Create report log", anchor="w")
-        self.evolution_report_log_label.place(x=178, y=140, width=100, height=20)
+        self.evolution_report_log_label.place(x=178, y=145, width=100, height=20)
         self.evolution_report_log_label.config(background="gray8", foreground="white", font=("Terminal", 11))
 
         self.execution_button_text = StringVar()
@@ -95,7 +95,7 @@ class ElectionsFrame(Frame, Publisher, Observer):
         self.restart_button_text = StringVar()
         self.restart_button_text.set("Restart")
         self.restart_button = Button(self.options_frame, textvariable=self.restart_button_text, command=self.process_restart_button)
-        self.restart_button.place(x=20, y=260, width=260, height=50)
+        self.restart_button.place(x=20, y=270, width=260, height=50)
         self.restart_button.config(font=("Terminal"), state="disabled")
         self.restart_button.bind("<Enter>", lambda event: self.restart_button.config(cursor="hand2"))
         self.restart_button.bind("<Button-1>", self.play_restart_button_sound)
@@ -159,6 +159,12 @@ class ElectionsFrame(Frame, Publisher, Observer):
         # Variable to contain if it should be created or not in the evolution frame and, if it should be created, then the file path is passed too
         self.evolution_report_log_information = [False, ""]
 
+        # Variable for setting a default path for the evolution report log
+        self.default_evolution_report_log_path = None
+
+        # Variable to check if there are operators or any other non valid character inserted by the user in the entry widgets
+        self.non_valid_characters = ["%", "/", "*", "-", "+", ":", "[", "]", "¨", "{", "}", "=", "!", "¡", "?", "¿", "'", '"', ",", ";", ".", "_", "-", "|", "\\", "ª", "#", "º", "@", "·", "&", "$", "ç", "~", "<", ">"]
+
     def process_execution_button(self, type_of_execution):
         """Manage the execution button, to change the label, initialize the algorithm data in the external file and notify the observer"""
 
@@ -177,11 +183,11 @@ class ElectionsFrame(Frame, Publisher, Observer):
                     self.start_time_of_algorithm = int(time() * 1000)
                     self.prepare_notification("message", "Using the passed values on the election panel to operate in the genetic algorithm:", ["gray70", 2, 0, False])
                     self.prepare_notification("message", "Number of individuals   -> ", ["gray70", 1, 0, False])
-                    self.prepare_notification("message", "{}".format(self.individuals_entry_variable), ["OliveDrab1", 0, 0, False])
+                    self.prepare_notification("message", "{}".format(self.individuals_entry.get()), ["OliveDrab1", 0, 0, False])
                     self.prepare_notification("message", "Number of initial food  -> ", ["gray70", 1, 0, False])
-                    self.prepare_notification("message", "{}".format(self.food_entry_variable), ["OliveDrab1", 0, 0, False])
+                    self.prepare_notification("message", "{}".format(self.food_entry.get()), ["OliveDrab1", 0, 0, False])
                     self.prepare_notification("message", "Number of epochs        -> ", ["gray70", 1, 0, False])
-                    self.prepare_notification("message", "{}".format(self.epochs_entry_variable), ["OliveDrab1", 0, 1, False])
+                    self.prepare_notification("message", "{}".format(self.epochs_entry.get()), ["OliveDrab1", 0, 1, False])
             else:
                 self.type_of_notification = "update_time"
                 self.scale_of_time = "restart"
@@ -199,17 +205,23 @@ class ElectionsFrame(Frame, Publisher, Observer):
             # The path is then send to the evolution frame in order for it to write the data into the file while the algorithm runs
             self.evolution_report_log_information = [False, ""]
             if self.evolution_report_log_value.get() == 1:
-                files = [("All Files", "*.*"), ("Text Document", "*.txt")]
-                evolution_report_log_path = FileDialog.asksaveasfile(defaultextension=".txt", filetypes=files)
-
-                if evolution_report_log_path != None:
+                if self.default_evolution_report_log_path != None:
                     self.evolution_report_log_information[0] = True
-                    self.evolution_report_log_information[1] = evolution_report_log_path.name
-                    self.prepare_notification("message", "Selected path for the evolution report log -> ", ["gray70", 1, 0, False])
-                    self.prepare_notification("message", evolution_report_log_path.name, ["OliveDrab1", 0, 1, False])
+                    self.evolution_report_log_information[1] = self.default_evolution_report_log_path
+                    self.prepare_notification("message", "Using default path for the report log --> ", ["gray70", 1, 0, False])
+                    self.prepare_notification("message", self.default_evolution_report_log_path, ["OliveDrab1", 0, 1, False])
                 else:
-                    self.prepare_notification("message", "The creation of a report log for the algorithm was activated but no path was provided, so the application won't create the report", ["gray70", 1, 0, False])
-                    ReportsLogGenerator.write_error_data_to_log("warning/info", "The creation of a report log for the algorithm was activated but no path was provided / The application won't create the report")
+                    files = [("All Files", "*.*"), ("Text Document", "*.txt")]
+                    evolution_report_log_path = FileDialog.asksaveasfile(defaultextension=".txt", filetypes=files)
+
+                    if evolution_report_log_path != None:
+                        self.evolution_report_log_information[0] = True
+                        self.evolution_report_log_information[1] = evolution_report_log_path.name
+                        self.prepare_notification("message", "Selected path for the evolution report log -> ", ["gray70", 1, 0, False])
+                        self.prepare_notification("message", evolution_report_log_path.name, ["OliveDrab1", 0, 1, False])
+                    else:
+                        self.prepare_notification("message", "The creation of a report log for the algorithm was activated but no path was provided, so the application won't create the report", ["gray70", 1, 1, False])
+                        ReportsLogGenerator.write_error_data_to_log("warning/info", "The creation of a report log for the algorithm was activated but no path was provided / The application won't create the report")
 
             self.execution_origin = "in_frame"
             self.restart_button.config(state="normal")
@@ -308,13 +320,13 @@ class ElectionsFrame(Frame, Publisher, Observer):
         In case there is an error the algorithm wont start.
         """
 
-        if self.individuals_entry_variable == "" or self.food_entry_variable == "" or self.epochs_entry_variable == "":
+        if self.individuals_entry.get() == "" or self.food_entry.get() == "" or self.epochs_entry.get() == "":
             self.prepare_notification("error", "You have to introduce all values for the individuals, food and epochs data in order to run the algorithm or press the default button", [1, 0])
             ReportsLogGenerator.write_error_data_to_log(type="error", message="You have to introduce all values for the individuals, food and epochs data in order to run the algorithm or press the default button")
             return True
         elif self.individuals_entry_variable_status == "error" or self.food_entry_variable_status == "error" or self.epochs_entry_variable_status == "error":
-            self.prepare_notification("error", "You have inserted wrong data in the elections panel", [1, 0])
-            ReportsLogGenerator.write_error_data_to_log(type="error", message="You have inserted wrong data in the elections panel")
+            self.prepare_notification("error", "You have inserted wrong data in the entry widgets", [1, 0])
+            ReportsLogGenerator.write_error_data_to_log(type="error", message="You have inserted wrong data in the entry widgets")
             return True
         elif self.individuals_entry_variable_status == "num_error" or self.food_entry_variable_status == "num_error" or self.epochs_entry_variable_status == "num_error":
             self.prepare_notification("error", "Values for the algorithm should be between:\nIndividuals --> [{}, {}]\nFood --> [{}, {}]\nEpochs --> [{}, {}]".format(
@@ -356,18 +368,30 @@ class ElectionsFrame(Frame, Publisher, Observer):
             self.prepare_notification("message", "Create evolution report log --> ", ["gray70", 2, 0, False])
             self.prepare_notification("message", "DEACTIVE", ["OliveDrab1", 0, 2, True])
 
+    """
+    When the user inserts data into the entry the stored value is the one before the insert so for the algorithm to get the new value there has to be an update on the entry widget.
+    This method will serve like and "update" method binded to the widget but will do nothing. So when a user press and release a key from the board the stored values will go as follows:
+        1. The user press the 1 key and the stored value will be "", because it stores the value before the 1 was inserted
+        2. The user release the 1 key and then the stored value will be "1" because the release event updated the widget and the new value could be stored and took from the get() method of the widget
+    So what is really happening is that the second event binded to the entry widget gave back the real value the user inserted after updating the so said widget.
+    This is done for the three entry widgets on the elections panel
+    """
+    def process_individuals_data_update(self, event):
+        pass
+
+    def process_food_data_update(self, event):
+        pass
+
+    def process_epochs_data_update(self, event):
+        pass
+
     def process_individuals_data(self, event):
         """Looks for errors in the individuals entry data"""
-
-        if event.keysym == "BackSpace":
-            self.individuals_entry_variable = self.individuals_entry_variable[:-1]
-        else:
-            self.individuals_entry_variable += event.char
         
-        if any([char.isalpha() for char in self.individuals_entry_variable]):
+        if any([char.isalpha() or char in self.non_valid_characters for char in self.individuals_entry.get()]):
             self.individuals_entry.config(foreground="red")
             self.individuals_entry_variable_status = "error"
-        elif self.individuals_entry_variable != "" and (int(self.individuals_entry_variable) < self.min_max_individuals_data[0] or int(self.individuals_entry_variable) > self.min_max_individuals_data[1]):
+        elif self.individuals_entry.get() != "" and (int(self.individuals_entry.get()) < self.min_max_individuals_data[0] or int(self.individuals_entry.get()) > self.min_max_individuals_data[1]):
             self.individuals_entry.config(foreground="red")
             self.individuals_entry_variable_status = "num_error"
         else:
@@ -376,16 +400,11 @@ class ElectionsFrame(Frame, Publisher, Observer):
 
     def process_food_data(self, event):
         """Looks for errors in the food entry data"""
-
-        if event.keysym == "BackSpace":
-            self.food_entry_variable = self.food_entry_variable[:-1]
-        else:
-            self.food_entry_variable += event.char
         
-        if any([char.isalpha() for char in self.food_entry_variable]):
+        if any([char.isalpha() or char in self.non_valid_characters for char in self.food_entry.get()]):
             self.food_entry.config(foreground="red")
             self.food_entry_variable_status = "error"
-        elif self.food_entry_variable != "" and (int(self.food_entry_variable) < self.min_max_food_data[0] or int(self.food_entry_variable) > self.min_max_food_data[1]):
+        elif self.food_entry.get() != "" and (int(self.food_entry.get()) < self.min_max_food_data[0] or int(self.food_entry.get()) > self.min_max_food_data[1]):
             self.food_entry.config(foreground="red")
             self.food_entry_variable_status = "num_error"
         else:
@@ -395,15 +414,10 @@ class ElectionsFrame(Frame, Publisher, Observer):
     def process_epochs_data(self, event):
         """Looks for errors in the epochs entry data"""
 
-        if event.keysym == "BackSpace":
-            self.epochs_entry_variable = self.epochs_entry_variable[:-1]
-        else:
-            self.epochs_entry_variable += event.char
-
-        if any([char.isalpha() for char in self.epochs_entry_variable]):
+        if any([char.isalpha() or char in self.non_valid_characters for char in self.epochs_entry.get()]):
             self.epochs_entry.config(foreground="red")
             self.epochs_entry_variable_status = "error"
-        elif self.epochs_entry_variable != "" and (int(self.epochs_entry_variable) < self.min_max_epochs_data[0] or int(self.epochs_entry_variable) > self.min_max_epochs_data[1]):
+        elif self.epochs_entry.get() != "" and (int(self.epochs_entry.get()) < self.min_max_epochs_data[0] or int(self.epochs_entry.get()) > self.min_max_epochs_data[1]):
             self.epochs_entry.config(foreground="red")
             self.epochs_entry_variable_status = "num_error"
         else:
@@ -426,7 +440,7 @@ class ElectionsFrame(Frame, Publisher, Observer):
         if self.type_of_notification == "run":
             data = self.default_evolution_data
             if self.default_value.get() == 0:
-                data = [int(self.individuals_entry_variable), int(self.food_entry_variable), int(self.epochs_entry_variable)]
+                data = [int(self.individuals_entry.get()), int(self.food_entry.get()), int(self.epochs_entry.get())]
             for observers in self._observers:
                 observers.update(self.type_of_notification, data, self.evolution_report_log_information)
         elif self.type_of_notification == "stop" or self.type_of_notification == "continue" or self.type_of_notification == "restart":
@@ -522,6 +536,10 @@ class ElectionsFrame(Frame, Publisher, Observer):
                 self.epoch_progress_bar_color_gradient.set_new_colors("brown", "goldenrod1")
                 self.algorithm_progress_bar_color_gradient.set_new_colors("goldenrod1", "brown")
                 self.min_max_food_data = [5, 30]
+        elif args[0] == "set_default_path":
+            self.default_evolution_report_log_path = args[1]
+        elif args[0] == "unset_default_path":
+            self.default_evolution_report_log_path = None
 
     def prepare_notification(self, type, message, extra):
         """This method will be called when a message is send from the election frame to the main terminal or the errors terminal"""

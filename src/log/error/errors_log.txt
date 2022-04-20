@@ -1,9 +1,3 @@
-12/04/2022 20:30:05 [WARNING/INFO] The creation of a report log for the algorithm was activated but no path was provided / The application won't create the report
-12/04/2022 20:45:46 [WARNING] You cannot use the environment buttons when the algorithm is already running
-12/04/2022 20:45:46 [WARNING] You cannot use the environment buttons when the algorithm is already running
-12/04/2022 20:45:46 [WARNING] You cannot use the environment buttons when the algorithm is already running
-12/04/2022 20:45:49 [WARNING] You cannot change the default values nor the create report log status while the algorithm is running
-12/04/2022 20:45:51 [WARNING] You cannot change the default values nor the create report log status while the algorithm is running
-12/04/2022 21:36:17 [WARNING/INFO] The creation of a report log for the algorithm was activated but no path was provided / The application won't create the report
-13/04/2022 19:22:26 [WARNING/INFO] The creation of a report log for the algorithm was activated but no path was provided / The application won't create the report
-13/04/2022 19:22:37 [WARNING] You cannot use the environment buttons when the algorithm is already running
+19/04/2022 20:48:02 [WARNING] The algorithm was already stopped
+19/04/2022 20:48:09 [WARNING] The algorithm is already running
+19/04/2022 21:03:40 [WARNING] You first have to run the algorithm in order to restart it's values

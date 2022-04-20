@@ -127,6 +127,12 @@ class EvolutionFrame(Frame, Observer, Publisher):
         # It is always restarted after the algorithm execution is finished, but not when it is restarted
         self.temp_actual_epoch = 1
 
+        # Variable for the application to know if the genetic algorithm is running
+        self.algorithm_running_status = False
+
+        # Variable to stop the algorithm if the application is closed while the genetic algorithm is running
+        self.stop_algorithm_execution = False
+
     def update(self, *args) -> None:
         """Receive the update from the publisher"""
         
@@ -185,9 +191,11 @@ class EvolutionFrame(Frame, Observer, Publisher):
 
                 self.prepare_notification("message", "Running epoch ", ["gray70", 1, 0, False])
                 self.prepare_notification("message", str(self.actual_epoch), ["OliveDrab1", 0, 0, False])
-            
+
             # Start the algorithm execution
             self.run_algorithm()
+
+            self.algorithm_running_status = True
         elif args[0] == "stop":
             self.start_stopped_time_of_epoch = int(time() * 1000)
             self.stop()
@@ -207,6 +215,8 @@ class EvolutionFrame(Frame, Observer, Publisher):
 
             # Restart al the values of the evolution frame in use by the algorithm
             self.restart()
+
+            self.algorithm_running_status = False
             self.prepare_notification("message", "Restarting the execution of the algorithm", ["gray70", 1, 2, True])
         elif args[0] == "change_environment":
             if args[1] == "polar":
@@ -259,6 +269,9 @@ class EvolutionFrame(Frame, Observer, Publisher):
         elif self.type_of_notification == "update_epoch_time":
             for observers in self._observers:
                 observers.update(self.type_of_notification, self.transform_time(self.start_time_of_epoch, self.end_time_of_epoch, self.scale_of_time), self.scale_of_time)
+        elif self.type_of_notification == "finish_application":
+            for observers in self._observers:
+                observers.update(self.type_of_notification)
 
     def evaluate_individual(self, tag, species_body):
         """
@@ -281,7 +294,6 @@ class EvolutionFrame(Frame, Observer, Publisher):
                 if food_collision_response:
                     species_object.add_piece()
                     if species_object.food_pieces == self.needed_food_to_survive_and_evolve[0]:
-                        print("got", species_object.food_pieces)
                         self.prepare_characteristics_notification(
                             number_of_non_survival_individuals=self.calculations_characteristics_data["number_of_non_survival_individuals"] - 1
                         )
@@ -315,6 +327,12 @@ class EvolutionFrame(Frame, Observer, Publisher):
 
         if self.execution_status:
             if self.all_threads_finished == len(self.species_bodies):
+                # If the application is going to be closed while the algorithm is running, this variable will be set to True to stop the execution and creation of new threads
+                if self.stop_algorithm_execution:
+                    self.type_of_notification = "finish_application"
+                    self.notify()
+                    return
+
                 # This calculation is made for the progress bar
                 if self.time_of_actual_epoch == int(round(self.total_time_per_epoch * self.total_time_per_epoch_percentage, 0)):
                     self.type_of_notification = "progress_epoch_bar"
@@ -390,7 +408,7 @@ class EvolutionFrame(Frame, Observer, Publisher):
         self.scale_of_time = ""
 
         if self.track_evolution_report:
-        # Writting the ending data of the actual epoch to the evolution report log
+            # Writting the ending data of the actual epoch to the evolution report log
             self.prepare_notification("message", "Writting ending data from epoch ", ["gray70", 1, 0, False])
             self.prepare_notification("message", str(self.actual_epoch), ["OliveDrab1", 0, 0, False])
             self.prepare_notification("message", " to the report log... ", ["gray70", 0, 0, False])
@@ -411,20 +429,18 @@ class EvolutionFrame(Frame, Observer, Publisher):
         # Call the genetic algorithm function to process the new data
         # If it returns True, then it means there are no survivals left and the algorithm has to stopped it's execution
         # If it return False, the algorithm will continue with the execution in a normal way
-        if self.genetic_algorithm():
-            self.abrupt_stop_of_execution = True
-            finish = True
+        if self.genetic_algorithm(): self.abrupt_stop_of_execution = True
 
         self.prepare_notification("message", "Done", ["OliveDrab1", 0, 0, False])
 
-        if finish:
+        if finish or self.abrupt_stop_of_execution:
             if self.track_evolution_report:
                 # Writting the last epoch data processed by the genetic algorithm
                 self.prepare_notification("message", "Writting final data of the algorithm to the report log... ", ["gray70", 1, 0, False])
                 ReportsLogGenerator.write_evolution_data_to_log(reports_path=self.actual_evolution_report_log, data=self.calculations_characteristics_data, running_state="ending_algorithm")
                 self.prepare_notification("message", "Done", ["OliveDrab1", 0, 0, False])
 
-            if self.abrupt_stop_of_execution:
+            if self.abrupt_stop_of_execution and not finish:
                 self.prepare_notification("message", "The algorithm has stopped at epoch ", ["gray70", 1, 0, False])
                 self.prepare_notification("message", str(self.actual_epoch), ["OliveDrab1", 0, 0, False])
                 self.prepare_notification("message", " because there are no survivals left!", ["gray70", 0, 2, True])
@@ -804,6 +820,8 @@ class EvolutionFrame(Frame, Observer, Publisher):
         self.notify()
 
         self.temp_actual_epoch = 1
+
+        self.algorithm_running_status = False
 
     def prepare_notification(self, type, message, extra):
         """This function prepares the notification for the messages data to be passed to the main terminal"""

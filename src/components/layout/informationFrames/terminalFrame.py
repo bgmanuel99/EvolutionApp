@@ -42,6 +42,9 @@ class TerminalFrame(Frame, Publisher):
         self.evolution_command = ""
         self.modifiable_terminal = True
 
+        # Variable to set a default path for the evolution report log
+        self.default_path = ""
+
     def subscribe(self, observer: Observer) -> None:
         """Subscribes an observer to the publisher"""
 
@@ -55,8 +58,12 @@ class TerminalFrame(Frame, Publisher):
     def notify(self) -> None:
         """Notify all observer about an event"""
         
-        for observers in self._observers:
-            observers.update(self.evolution_command)
+        if self.evolution_command == "set_default_path":
+            for observers in self._observers:
+                observers.update(self.evolution_command, self.default_path)
+        else:
+            for observers in self._observers:
+                observers.update(self.evolution_command)
 
     def write_command(self):
         """Inserts a new line for the user to introduce the next command"""
@@ -75,26 +82,13 @@ class TerminalFrame(Frame, Publisher):
             self.terminal.config(state="disabled")
             return
         
-        command = command[2]
+        type_of_command = command[2]
 
-        self.new_line()
-
-        if command.lower() == "run":
+        if type_of_command.lower() == "run":
             self.evolution_command = "run"
             self.notify()
-        elif command.lower() == "stop":
-            self.evolution_command = "stop"
-            self.write_command()
-            self.notify()
-        elif command.lower() == "continue":
-            self.evolution_command = "continue"
-            self.write_command()
-            self.notify()
-        elif command.lower() == "restart":
-            self.evolution_command = "restart"
-            self.write_command()
-            self.notify()
-        elif command.lower() == "help":
+        elif type_of_command.lower() == "help":
+            self.new_line()
             self.new_line()
             
             with open(os.getcwd().replace("\\", "/") + "/archive/commandDescriptions.csv", newline="\n") as csvFile:
@@ -106,15 +100,70 @@ class TerminalFrame(Frame, Publisher):
 
             self.new_line()
             self.write_command()
-        elif command.lower() == "clear":
+        elif type_of_command.lower() == "clear":
             self.clear_terminal()
-        elif command.lower() == "exit":
+        elif type_of_command.lower() == "exit":
             self.evolution_command = "exit"
-            self.write_command()
             self.notify()
             return
+        elif type_of_command.lower() == "set":
+            if len(command) < 4:
+                self.new_line()
+                self.new_line()
+                self.write_message("You have to insert a path to set the default report log", "red", True)
+                self.new_line()
+                self.write_command()
+            else:
+                final_path = command[3].replace('"', "") + " "
+                
+                # If the lenght of the command list is more than 4 it means the user introduced a path with spaces
+                if len(command) > 4:
+                    for index in range(4, len(command)):
+                        final_path += command[index].replace('"', "") + " "
+
+                # Get out of the final path the last space
+                final_path = final_path[:-1]
+
+                if not os.path.exists(final_path):
+                    self.new_line()
+                    self.new_line()
+                    self.write_message("The path does'nt exists, insert a correct path", "red", True)
+                    self.new_line()
+                    self.write_command()
+                elif not os.path.isfile(final_path):
+                    self.new_line()
+                    self.new_line()
+                    self.write_message("The path needs to end at a txt file --> path_to_file/*.txt, where * means any name for the file", "red", True)
+                    self.new_line()
+                    self.write_command()
+                elif not final_path.lower().endswith(".txt"):
+                    self.new_line()
+                    self.new_line()
+                    self.write_message("The provided file should have a txt extension --> *.txt", "red", True)
+                    self.new_line()
+                    self.write_command()
+                else:
+                    self.new_line()
+                    self.new_line()
+                    self.write_message("Setting the default path to --> ")
+                    self.write_message(final_path, "OliveDrab1", True)
+                    self.new_line()
+                    self.write_command()
+                    self.default_path = final_path
+                    self.evolution_command = "set_default_path"
+                    self.notify()
+        elif type_of_command.lower() == "unset":
+            self.new_line()
+            self.new_line()
+            self.write_message("Unsetting the stored default path", "gray70", True)
+            self.new_line()
+            self.write_command()
+            self.evolution_command = "unset_default_path"
+            self.notify()
         else:
+            self.new_line()
             self.write_message("Unknown command, use help to see the possible commands", "red", True)
+            self.new_line()
             self.write_command()
 
         # The reason to finally disable the terminal is for the return key not to insert a break in the text

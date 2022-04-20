@@ -16,6 +16,7 @@ class Application(Tk, Observer):
         self.title("Evolution")
         self.iconbitmap(os.getcwd().replace("\\", "/") + "/assets/icon/evolution.ico")
         self.resizable(0, 0)
+        self.protocol("WM_DELETE_WINDOW", self.exit)
 
         # Set the volume of the application to 100%
         SoundEffects.button_click.set_volume(1)
@@ -28,47 +29,79 @@ class Application(Tk, Observer):
 
         self.initial_frame.subscribe(self)
 
+        # This variable will set a time in between messages on the initial frame so the user can see the widgets that are been loaded
+        self.delay_time = 0
+
         self.load_main_widgets()
 
     def load_main_widgets(self):
         """This method loads all the widgets of the application and subscribes the widgets between them so they can comunicate"""
 
-        # Main manu bar for the main window
-        self.root_menu_bar = RootMenuBar(self)
-        self.initial_frame.set_progress_bar(10)
+        self.delay_time += 200
 
-        # Top frame of the main window
-        self.top_frame = TopFrame(self)
-        self.initial_frame.set_progress_bar(30)
+        if self.delay_time == 200:
+            # Main menu bar for the main window
+            self.initial_frame.set_progress_information("Main Menu")
+            self.root_menu_bar = RootMenuBar(self)
+            self.initial_frame.set_progress_bar(10)
 
-        #Bottom frame of the main window
-        self.bottom_frame = BottomFrame(self)
-        self.initial_frame.set_progress_bar(50)
+        if self.delay_time == 400:
+            # Top frame of the main window
+            self.initial_frame.set_progress_information("Top Frame")
+            self.top_frame = TopFrame(self)
+            self.initial_frame.set_progress_bar(30)
 
-        # Subscribers and observers
-        self.root_menu_bar.subscribe(self.top_frame.information_frame)
-        self.root_menu_bar.subscribe(self.top_frame.elections_frame)
-        self.root_menu_bar.subscribe(self.top_frame.environment_frame)
-        self.initial_frame.set_progress_bar(60)
+        if self.delay_time == 600:
+            # Bottom frame of the main window
+            self.initial_frame.set_progress_information("Bottom Frame")
+            self.bottom_frame = BottomFrame(self)
+            self.initial_frame.set_progress_bar(50)
 
-        self.top_frame.information_frame.terminal_frame.subscribe(self.top_frame.elections_frame)
-        self.top_frame.information_frame.terminal_frame.subscribe(self)
-        self.initial_frame.set_progress_bar(70)
+        if self.delay_time == 800:
+            # Subscribers and observers for the Main Menu
+            self.initial_frame.set_progress_information("subscribers for the Main Menu")
+            self.root_menu_bar.subscribe(self.top_frame.information_frame)
+            self.root_menu_bar.subscribe(self.top_frame.elections_frame)
+            self.root_menu_bar.subscribe(self.top_frame.environment_frame)
+            self.root_menu_bar.subscribe(self)
+            self.initial_frame.set_progress_bar(60)
 
-        self.top_frame.elections_frame.subscribe(self.top_frame.evolution_frame)
-        self.top_frame.elections_frame.subscribe(self.top_frame.information_frame)
-        self.top_frame.elections_frame.subscribe(self.top_frame.environment_frame)
-        self.initial_frame.set_progress_bar(80)
+        if self.delay_time == 1000:
+            # Subscribers and observers for the Information Frame
+            self.initial_frame.set_progress_information("subscribers for the Information Frame")
+            self.top_frame.information_frame.terminal_frame.subscribe(self.top_frame.elections_frame)
+            self.top_frame.information_frame.terminal_frame.subscribe(self)
+            self.initial_frame.set_progress_bar(70)
 
-        self.top_frame.evolution_frame.subscribe(self.top_frame.information_frame)
-        self.top_frame.evolution_frame.subscribe(self.top_frame.elections_frame)
-        self.initial_frame.set_progress_bar(90)
+        if self.delay_time == 1200:
+            # Subscribers and observers for the Elections Frame
+            self.initial_frame.set_progress_information("subscribers for the Elections Frame")
+            self.top_frame.elections_frame.subscribe(self.top_frame.evolution_frame)
+            self.top_frame.elections_frame.subscribe(self.top_frame.information_frame)
+            self.top_frame.elections_frame.subscribe(self.top_frame.environment_frame)
+            self.initial_frame.set_progress_bar(80)
 
-        self.top_frame.environment_frame.subscribe(self.top_frame.elections_frame)
-        self.top_frame.environment_frame.subscribe(self.top_frame.evolution_frame)
-        self.top_frame.environment_frame.subscribe(self.top_frame.information_frame)
-        self.top_frame.environment_frame.subscribe(self.root_menu_bar)
-        self.initial_frame.set_progress_bar(100)
+        if self.delay_time == 1400:
+            # Subscribers and observers for the Evolution Frame
+            self.initial_frame.set_progress_information("subscribers for the Evolution Frame")
+            self.top_frame.evolution_frame.subscribe(self.top_frame.information_frame)
+            self.top_frame.evolution_frame.subscribe(self.top_frame.elections_frame)
+            self.top_frame.evolution_frame.subscribe(self)
+            self.initial_frame.set_progress_bar(90)
+
+        if self.delay_time == 1600:
+            # Subscribers and observers for the Environment Frame
+            self.initial_frame.set_progress_information("subscribers for the Environment Frame")
+            self.top_frame.environment_frame.subscribe(self.top_frame.elections_frame)
+            self.top_frame.environment_frame.subscribe(self.top_frame.evolution_frame)
+            self.top_frame.environment_frame.subscribe(self.top_frame.information_frame)
+            self.top_frame.environment_frame.subscribe(self.root_menu_bar)
+            self.initial_frame.set_progress_bar(100)
+            self.initial_frame.show_click_message()
+            self.delay_time = 0
+            return
+
+        self.after(200, self.load_main_widgets)
 
     def load_main_app(self):
         """This method packs all the widgets of the application"""
@@ -91,3 +124,11 @@ class Application(Tk, Observer):
             self.destroy()
         elif args[0] == "load_app":
             self.load_main_app()
+        elif args[0] == "finish_application":
+            self.destroy()
+
+    def exit(self):
+        """This method will be called whenever the application is exit"""
+        
+        if self.top_frame.evolution_frame.algorithm_running_status: self.top_frame.evolution_frame.stop_algorithm_execution = True
+        else: self.destroy()
