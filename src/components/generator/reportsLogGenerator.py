@@ -1,4 +1,5 @@
 import os
+import shutil
 import datetime
 
 class ReportsLogGenerator():
@@ -137,9 +138,32 @@ class ReportsLogGenerator():
     def write_error_data_to_log(type="", message=""):
         """This method inserts errors, warnings or any other util information to the errors report log"""
 
-        errors_report_log = open(os.getcwd().replace("\\", "/") + "/log/error/errors_log.txt", "a")
-
         actual_time_of_error = datetime.datetime.now()
+
+        errors_report_log = open(os.getcwd().replace("\\", "/") + "/log/actual_error_reports/errors_log_{}_{}_{}.txt".format(
+            actual_time_of_error.strftime("%d"),
+            actual_time_of_error.strftime("%m"),
+            actual_time_of_error.strftime("%Y")
+        ), "a+")
+
+        # This will order the error reports log directories. There will be a total of fourteen error report logs, seven report logs in the 'usabled directory' and 7 which will be deleted, after, by the first ones.
+        # The replace of the seven first error report logs will be done after there are other 8 to be stored, staying at last 7 as the 'old usable reports' and 1 in the new.
+        # When the seven 'old' error report logs, if there were any stored before, are going to be replaced by other seven 'old' error report logs, the first ones will be permanently erased so there is'nt a huge 
+        # amount of reports stored in the application.
+        errors_report_file_paths = [os.path.abspath(file.path).replace("\\", "/") for file in os.scandir(os.getcwd().replace("\\", "/") + "/log/actual_error_reports") if file.is_file()]
+        if len(errors_report_file_paths) == 8:
+            # As there are 8 files, 7 have to be passed into the old error reports directory, but first the other 7, if there were any, on that directory have to be removed
+            shutil.rmtree(os.getcwd().replace("\\", "/") + "/log/old_error_reports")
+
+            # As shutil.rmtree deletes the complete directory it have to be newly created
+            os.mkdir(os.getcwd().replace("\\", "/") + "/log/old_error_reports")
+
+            # Then traspass the last 7 error report logs except fot the newest one
+            for index, file_path in enumerate(errors_report_file_paths):
+                file_date = file_path.split("/")[-1].split(".")[0].split("_")
+                if file_date[2] == actual_time_of_error.strftime("%d") and file_date[3] == actual_time_of_error.strftime("%m") and file_date[4] == actual_time_of_error.strftime("%Y"): continue
+                else:
+                    os.rename(errors_report_file_paths[index], errors_report_file_paths[index].replace("actual_error_reports", "old_error_reports"))
 
         errors_report_log.write("{}/{}/{} {}:{}:{} [{}] {}\n".format(
             actual_time_of_error.strftime("%d"),
@@ -153,9 +177,3 @@ class ReportsLogGenerator():
         ))
 
         errors_report_log.close()
-
-    @staticmethod
-    def delete_errors_report_log_content():
-        """This method deletes all the data on the errors report log"""
-
-        open(os.getcwd().replace("\\", "/") + "/log/error/errors_log.txt", "w").close()

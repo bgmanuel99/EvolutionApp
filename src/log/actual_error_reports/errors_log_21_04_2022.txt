@@ -1,0 +1,13 @@
+21/04/2022 08:18:42 [WARNING] You first have to run the algorithm in order to restart it's values
+21/04/2022 08:18:54 [WARNING] You cannot continue the execution of the algorithm as it has not been started
+21/04/2022 08:19:22 [ERROR] You have to introduce all values for the individuals, food and epochs data in order to run the algorithm or press the default button
+21/04/2022 21:42:41 [WARNING] You first have to run the algorithm in order to restart it's values
+21/04/2022 21:43:07 [WARNING] You first have to run the algorithm in order to restart it's values
+21/04/2022 21:43:54 [WARNING] You first have to run the algorithm in order to restart it's values
+21/04/2022 21:46:06 [WARNING] You first have to run the algorithm in order to restart it's values
+21/04/2022 21:47:12 [WARNING] You first have to run the algorithm in order to restart it's values
+21/04/2022 22:08:33 [WARNING] You first have to run the algorithm in order to restart it's values
+21/04/2022 22:08:49 [WARNING] You first have to run the algorithm in order to restart it's values
+21/04/2022 22:08:50 [WARNING] You first have to run the algorithm in order to restart it's values
+21/04/2022 22:27:25 [WARNING] You first have to run the algorithm in order to restart it's values
+21/04/2022 22:31:17 [WARNING] You first have to run the algorithm in order to restart it's values

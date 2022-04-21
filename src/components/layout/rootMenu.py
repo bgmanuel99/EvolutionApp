@@ -3,12 +3,10 @@ import csv
 from tkinter import *
 from tkinter import ttk
 from typing import List
-from tkinter import messagebox as MessageBox
 from components.models.gradients import GradientFrame
 from components.interfaces.observer import Observer
 from components.interfaces.publisher import Publisher
 from components.audio.soundEffects import SoundEffects
-from components.generator.reportsLogGenerator import ReportsLogGenerator
 
 class RootMenuBar(Menu, Publisher, Observer):
 
@@ -27,8 +25,6 @@ class RootMenuBar(Menu, Publisher, Observer):
 
         # File menu commands
         self.file_menu = Menu(self, tearoff=0)
-        self.file_menu.add_command(label="Delete errors report content", command=lambda: self.delete_errors_report_log_content())
-        self.file_menu.add_separator()
         self.file_menu.add_command(label="Volume", command=self.volume_popup)
         self.file_menu.add_separator()
         self.file_menu.add_command(label="Exit", command=lambda: self.pre_notify("exit"))
@@ -276,32 +272,32 @@ class RootMenuBar(Menu, Publisher, Observer):
     def volume_popup(self):
         """This method creates the popup from which the user can change the volume of the application"""
 
-        volume_window = Toplevel(width=400, height=250)
+        volume_window = Toplevel(width=250, height=250)
         volume_window.wm_title("Volume")
         volume_window.resizable(0, 0)
         volume_window.propagate(False)
         volume_window.iconbitmap(os.getcwd().replace("\\", "/") + "/assets/icon/evolution.ico")
 
         self.volume_gradient = GradientFrame(volume_window, self.volume_gradient_colors[0], self.volume_gradient_colors[1])
-        self.volume_gradient.place(x=0, y=0, width=400, height=250)
+        self.volume_gradient.place(x=0, y=0, width=250, height=250)
         self.volume_gradient.config(bd=0, highlightthickness=0, relief='ridge')
 
         volume_window.bind("<Destroy>", self.reinitilize_volume_gradient)
 
         volume_frame = Frame(self.volume_gradient)
-        volume_frame.place(x=4, y=4, width=392, height=242)
+        volume_frame.place(x=4, y=4, width=242, height=242)
         volume_frame.pack_propagate(0)
         volume_frame.config(background="gray8")
 
         buttons_volume_label = Label(volume_frame, text="Environment volume", anchor="w")
-        buttons_volume_label.place(x=20, y=20, width=100, height=20)
+        buttons_volume_label.place(x=75, y=20, width=100, height=20)
         buttons_volume_label.config(background="gray8", foreground="white", font=("Terminal", 11))
 
-        self.buttons_volume_slider = ttk.Scale(volume_frame, from_=0, to=100, orient='vertical', command=self.set_buttons_volume)
-        self.buttons_volume_slider.place(x=55, y=50, width=25, height=150)
+        self.buttons_volume_slider = ttk.Scale(volume_frame, from_=100, to=0, orient='vertical', command=self.set_buttons_volume)
+        self.buttons_volume_slider.place(x=110, y=50, width=25, height=150)
 
         self.buttons_volume_value = Label(volume_window, text=str(int(round(self.buttons_volume_slider.get(), 0))) + " %")
-        self.buttons_volume_value.place(x=63, y=210, width=30, height=20)
+        self.buttons_volume_value.place(x=113, y=210, width=30, height=20)
         self.buttons_volume_value.config(background="gray8", foreground="white", font=("Terminal", 11))
         
         self.buttons_volume_slider.set(100)
@@ -442,13 +438,6 @@ class RootMenuBar(Menu, Publisher, Observer):
                 for _ in range(after_breaks): self.new_line()
 
         self.search_text.config(state="disabled")
-
-    def delete_errors_report_log_content(self):
-        """This method deletes the content of the errors report log"""
-
-        result = MessageBox.askokcancel("Ask", "Are you sure you want to delete the errors report content")
-
-        if result: ReportsLogGenerator.delete_errors_report_log_content()
 
     def play_button_sound(self):
         """This method loads and plays the sound of a button been pressed for the search button in the help popup"""

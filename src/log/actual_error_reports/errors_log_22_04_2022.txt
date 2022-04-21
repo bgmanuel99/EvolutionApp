@@ -1,0 +1,9 @@
+22/04/2022 01:25:13 [WARNING] You first have to run the algorithm in order to restart it's values
+22/04/2022 01:25:14 [WARNING] You first have to run the algorithm in order to restart it's values
+22/04/2022 01:31:56 [WARNING] You first have to run the algorithm in order to restart it's values
+22/04/2022 01:31:56 [WARNING] You first have to run the algorithm in order to restart it's values
+22/04/2022 01:31:56 [WARNING] You first have to run the algorithm in order to restart it's values
+22/04/2022 01:32:00 [WARNING] You first have to run the algorithm in order to restart it's values
+22/04/2022 01:32:00 [WARNING] You first have to run the algorithm in order to restart it's values
+22/04/2022 01:32:04 [WARNING] You first have to run the algorithm in order to restart it's values
+22/04/2022 01:32:04 [WARNING] You first have to run the algorithm in order to restart it's values

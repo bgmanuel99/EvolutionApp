@@ -6,10 +6,11 @@ from tkinter import *
 from time import time
 from typing import List
 from collections import Counter
+from tkinter import messagebox as MessageBox
+from components.models.species import Species
 from components.models.gradients import GradientFrame
 from components.interfaces.observer import Observer
 from components.interfaces.publisher import Publisher
-from components.models.species import Species
 from components.generator.reportsLogGenerator import ReportsLogGenerator
 
 class EvolutionFrame(Frame, Observer, Publisher):
@@ -794,9 +795,6 @@ class EvolutionFrame(Frame, Observer, Publisher):
             self.full_stopped_time_of_epoch = 0
             self.scale_of_time = ""
 
-            # Reset the value that indicates if the algorithm has stopped because it finished or because there were no more individuals left
-            self.abrupt_stop_of_execution = False
-
             # Reset the value of the variable which tracks if the evolution report log shall be writted
             self.track_evolution_report = False
 
@@ -822,6 +820,11 @@ class EvolutionFrame(Frame, Observer, Publisher):
         self.temp_actual_epoch = 1
 
         self.algorithm_running_status = False
+
+        if self.abrupt_stop_of_execution: MessageBox.showwarning(message="The algorithm stopped because there are no survivals left", title="Algorithm warning")
+
+        # Reset the value that indicates if the algorithm has stopped because it finished or because there were no more individuals left
+        self.abrupt_stop_of_execution = False
 
     def prepare_notification(self, type, message, extra):
         """This function prepares the notification for the messages data to be passed to the main terminal"""

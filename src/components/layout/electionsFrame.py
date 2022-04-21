@@ -106,6 +106,12 @@ class ElectionsFrame(Frame, Publisher, Observer):
         self.epoch_progress_bar_label.place(x=20, y=340, width=120, height=20)
         self.epoch_progress_bar_label.config(background="gray8", foreground="white", font=("Terminal", 11))
 
+        self.epoch_progress_bar_percentage_label_variable = StringVar()
+        self.epoch_progress_bar_percentage_label_variable.set("[0 %]")
+        self.epoch_progress_bar_percentage_label = Label(self.options_frame, textvariable=self.epoch_progress_bar_percentage_label_variable, anchor="e")
+        self.epoch_progress_bar_percentage_label.place(x=257, y=340, width=40, height=20)
+        self.epoch_progress_bar_percentage_label.config(background="gray8", foreground="white", font=("Terminal", 11))
+
         self.epoch_progress_bar_color_gradient = GradientFrame(self.options_frame, color1="SpringGreen4", color2="OliveDrab1")
         self.epoch_progress_bar_color_gradient.place(x=8, y=368, width=284, height=24)
         self.epoch_progress_bar_color_gradient.config(bd=0, highlightthickness=0, relief='ridge')
@@ -119,6 +125,12 @@ class ElectionsFrame(Frame, Publisher, Observer):
         self.algorithm_progress_bar_label = Label(self.options_frame, text="Progress for the algorithm:", anchor="w")
         self.algorithm_progress_bar_label.place(x=20, y=420, width=140, height=20)
         self.algorithm_progress_bar_label.config(background="gray8", foreground="white", font=("Terminal", 11))
+
+        self.algorithm_progress_bar_percentage_label_variable = StringVar()
+        self.algorithm_progress_bar_percentage_label_variable.set("[0 %]")
+        self.algorithm_progress_bar_percentage_label = Label(self.options_frame, textvariable=self.algorithm_progress_bar_percentage_label_variable, anchor="e")
+        self.algorithm_progress_bar_percentage_label.place(x=247, y=420, width=50, height=20)
+        self.algorithm_progress_bar_percentage_label.config(background="gray8", foreground="white", font=("Terminal", 11))
 
         self.algorithm_progress_bar_color_gradient = GradientFrame(self.options_frame, color1="OliveDrab1", color2="SpringGreen4")
         self.algorithm_progress_bar_color_gradient.place(x=8, y=448, width=284, height=24)
@@ -283,7 +295,9 @@ class ElectionsFrame(Frame, Publisher, Observer):
                 # Restart the progress bars
                 self.epoch_progress.set(0)
                 self.epoch_progress_bar_label_variable.set("Progress for epoch: 0")
+                self.epoch_progress_bar_percentage_label_variable.set("[0 %]")
                 self.algorithm_progress.set(0)
+                self.algorithm_progress_bar_percentage_label_variable.set("[0 %]")
 
                 # Restart the algorithm on the evolution frame
                 self.type_of_notification = "restart"
@@ -507,7 +521,9 @@ class ElectionsFrame(Frame, Publisher, Observer):
             # Restart the progress bars
             self.epoch_progress.set(0)
             self.epoch_progress_bar_label_variable.set("Progress for epoch: 0")
+            self.epoch_progress_bar_percentage_label_variable.set("[0 %]")
             self.algorithm_progress.set(0)
+            self.algorithm_progress_bar_percentage_label_variable.set("[0 %]")
 
             # Set to normal the status of the environment buttons
             self.type_of_notification = "switch_buttons_state"
@@ -515,11 +531,14 @@ class ElectionsFrame(Frame, Publisher, Observer):
             self.notify()
         elif args[0] == "progress_epoch_bar":
             self.epoch_progress.set(self.epoch_progress.get() + 1)
+            self.epoch_progress_bar_percentage_label_variable.set("[{} %]".format(int(self.epoch_progress_bar_percentage_label_variable.get().replace("[", "").replace("]", "").replace(" ", "").replace("%", "")) + 1))
             if args[1]: 
                 self.epoch_progress_bar_label_variable.set("Progress for epoch: " + str(int(self.epoch_progress_bar_label_variable.get()[-1]) + 1))
                 self.epoch_progress.set(0)
+                self.epoch_progress_bar_percentage_label_variable.set("[0 %]")
         elif args[0] == "progress_algorithm_bar":
             self.algorithm_progress.set(args[1])
+            self.algorithm_progress_bar_percentage_label_variable.set("[{} %]".format(int(self.algorithm_progress_bar_percentage_label_variable.get().replace("[", "").replace("]", "").replace(" ", "").replace("%", "")) + args[1]))
         elif args[0] == "change_environment":
             if args[1] == "polar":
                 self.gradient.set_new_colors("magenta4", "RoyalBlue2")

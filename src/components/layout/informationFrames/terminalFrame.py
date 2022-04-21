@@ -213,14 +213,32 @@ class TerminalFrame(Frame, Publisher):
 
     def copy_text(self):
         """Copy the selected text from the terminal"""
-
-        self.clipboard_clear()
-        self.terminal.clipboard_append(self.terminal.selection_get())
+        
+        try:
+            self.clipboard_clear()
+            self.terminal.clipboard_append(self.terminal.selection_get())
+        except:
+            self.terminal.config(state="normal")
+            self.new_line()
+            self.new_line()
+            self.write_message(message="You have'nt selected any text", color="gray70", new_line=True)
+            self.new_line()
+            self.write_command()
+            self.terminal.config(state="disabled")
 
     def paste_text(self):
         """Paste text to the terminal"""
 
-        self.terminal.insert("end", self.clipboard_get())
+        try:
+            self.terminal.insert("end", self.clipboard_get())
+        except:
+            self.terminal.config(state="normal")
+            self.new_line()
+            self.new_line()
+            self.write_message(message="There is no data to be paste", color="gray70", new_line=True)
+            self.new_line()
+            self.write_command()
+            self.terminal.config(state="disabled")
 
     def process_message(self, message="", color="gray70", before_lines=0, after_lines=0, new_command=False):
         """This method receives incoming messages from other panels in the application and show them in the terminal"""

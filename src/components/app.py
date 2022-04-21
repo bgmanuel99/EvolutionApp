@@ -121,7 +121,7 @@ class Application(Tk, Observer):
         """Receive the update from the publisher"""
 
         if args[0] == "exit":
-            self.destroy()
+            self.exit()
         elif args[0] == "load_app":
             self.load_main_app()
         elif args[0] == "finish_application":
@@ -130,5 +130,7 @@ class Application(Tk, Observer):
     def exit(self):
         """This method will be called whenever the application is exit"""
         
-        if self.top_frame.evolution_frame.algorithm_running_status: self.top_frame.evolution_frame.stop_algorithm_execution = True
+        if self.top_frame.evolution_frame.algorithm_running_status: 
+            if self.top_frame.elections_frame.execution_button_text.get().lower() == "continue": self.destroy()
+            self.top_frame.evolution_frame.stop_algorithm_execution = True
         else: self.destroy()
