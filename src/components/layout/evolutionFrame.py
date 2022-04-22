@@ -134,6 +134,9 @@ class EvolutionFrame(Frame, Observer, Publisher):
         # Variable to stop the algorithm if the application is closed while the genetic algorithm is running
         self.stop_algorithm_execution = False
 
+        # Variable to know which environment is the genetic algorithm running on
+        self.actual_environment = "mediterranean"
+
     def update(self, *args) -> None:
         """Receive the update from the publisher"""
         
@@ -173,6 +176,8 @@ class EvolutionFrame(Frame, Observer, Publisher):
                 self.prepare_notification("message", "/", ["gray70", 0, 0, False])
                 self.prepare_notification("message", "{}".format(time_of_creation_of_evolution_report_log[5]), ["OliveDrab1", 0, 0, False])
                 self.prepare_notification("message", ". Initiating recording of data", ["gray70", 0, 0, False])
+
+                ReportsLogGenerator.write_message_to_evolution_log(reports_path=self.actual_evolution_report_log, message="The algorithm is running in the {} environment".format(self.actual_environment.upper()))
 
                 # Write message to the evolution report log that the values are been initialized for the algorithm to be started
                 ReportsLogGenerator.write_message_to_evolution_log(reports_path=self.actual_evolution_report_log, message="Initializing values for the first epoch in order to start the algorithm...")
@@ -226,18 +231,21 @@ class EvolutionFrame(Frame, Observer, Publisher):
                 self.needed_food_to_survive_and_evolve = [2, 3]
                 self.velocity_initializing_values = [0.3, 0.5]
                 self.velocity_limits = [0.3, 0.8]
+                self.actual_environment = "polar"
             elif args[1] == "mediterranean":
                 self.gradient.set_new_colors("SpringGreen4", "OliveDrab1")
                 self.evolution_frame.config(bg="pale green")
                 self.needed_food_to_survive_and_evolve = [1, 2]
                 self.velocity_initializing_values = [0.5, 0.7]
                 self.velocity_limits = [0.5, 1]
+                self.actual_environment = "mediterranean"
             elif args[1] == "desert":
                 self.gradient.set_new_colors("brown", "goldenrod1")
                 self.evolution_frame.config(bg="khaki1")
                 self.needed_food_to_survive_and_evolve = [1, 2]
                 self.velocity_initializing_values = [0.5, 0.7]
                 self.velocity_limits = [0.5, 1]
+                self.actual_environment = "desert"
 
     def subscribe(self, observer: Observer) -> None:
         """Subscribes an observer to the publisher"""
@@ -616,7 +624,7 @@ class EvolutionFrame(Frame, Observer, Publisher):
         """This method will slightly mutate the size of each new individual inserted for the genetic algorithm"""
 
         new_size = size + random.choice([-1, 1])
-        if new_size < 6 or new_size > 12: return size
+        if new_size < 10 or new_size > 17: return size
         return new_size
 
     def mutate_velocity(self, velocity):
@@ -661,7 +669,7 @@ class EvolutionFrame(Frame, Observer, Publisher):
 
         # Calculate all the species parameters
         for index in range(individuals):
-            size = random.randrange(6, 9)
+            size = random.randrange(12, 14)
             velocity_x = round(random.uniform(self.velocity_initializing_values[0], self.velocity_initializing_values[1]), 1) * random.choice([-1, 1])
             velocity_y = round(random.uniform(self.velocity_initializing_values[0], self.velocity_initializing_values[1]), 1) * random.choice([-1, 1])
             

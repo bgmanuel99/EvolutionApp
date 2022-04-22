@@ -2,7 +2,7 @@ from tkinter import *
 from typing import List
 from tkinter import font as TkFont
 from tkinter.ttk import Progressbar
-from components.models.gradients import GradientFrame
+from components.models.variousDimensionGradient import VariousDimensionGradient
 from components.interfaces.observer import Observer
 from components.interfaces.publisher import Publisher
 from components.audio.soundEffects import SoundEffects
@@ -24,17 +24,9 @@ class InitialFrame(Frame, Publisher):
 
         self.bind_all("<Key>", self.load_app)
 
-        top_border_gradient = GradientFrame(self, color1="purple", color2="dark turquoise")
-        top_border_gradient.place(x=0, y=0, width=1214, height=251)
-        top_border_gradient.config(bd=0, highlightthickness=0, relief='ridge')
-
-        middle_border_gradient = GradientFrame(self, color1="SeaGreen1", color2="green yellow")
-        middle_border_gradient.place(x=0, y=251, width=1214, height=250)
-        middle_border_gradient.config(bd=0, highlightthickness=0, relief='ridge')
-
-        bottom_border_gradient = GradientFrame(self, color1="goldenrod1", color2="brown")
-        bottom_border_gradient.place(x=0, y=501, width=1214, height=251)
-        bottom_border_gradient.config(bd=0, highlightthickness=0, relief='ridge')
+        border_gradient = VariousDimensionGradient(self, "purple", "dark turquoise", "SeaGreen1", "green yellow", "goldenrod1", "brown")
+        border_gradient.place(x=0, y=0, width=1214, height=906)
+        border_gradient.config(bd=0, highlightthickness=0, relief="ridge")
 
         main_text_font = TkFont.Font(family="Arial", size=80)
 

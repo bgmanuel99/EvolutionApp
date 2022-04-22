@@ -538,7 +538,7 @@ class ElectionsFrame(Frame, Publisher, Observer):
                 self.epoch_progress_bar_percentage_label_variable.set("[0 %]")
         elif args[0] == "progress_algorithm_bar":
             self.algorithm_progress.set(args[1])
-            self.algorithm_progress_bar_percentage_label_variable.set("[{} %]".format(int(self.algorithm_progress_bar_percentage_label_variable.get().replace("[", "").replace("]", "").replace(" ", "").replace("%", "")) + args[1]))
+            self.algorithm_progress_bar_percentage_label_variable.set("[{} %]".format(args[1]))
         elif args[0] == "change_environment":
             if args[1] == "polar":
                 self.gradient.set_new_colors("magenta4", "RoyalBlue2")

@@ -7,3 +7,4 @@
 22/04/2022 01:32:00 [WARNING] You first have to run the algorithm in order to restart it's values
 22/04/2022 01:32:04 [WARNING] You first have to run the algorithm in order to restart it's values
 22/04/2022 01:32:04 [WARNING] You first have to run the algorithm in order to restart it's values
+22/04/2022 19:20:06 [WARNING] You cannot change the default values nor the create report log status while the algorithm is running

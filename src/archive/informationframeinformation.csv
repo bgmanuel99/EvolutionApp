@@ -27,6 +27,7 @@
 "end","    Number of non-survival individuals\n", "OliveDrab1"
 "end","    Number of survival individuals\n", "OliveDrab1"
 "end","    Number of evolving individuals\n", "OliveDrab1"
+"end","    Time of epoch execution\n", "OliveDrab1"
 "end","The information displayed in the right frame of the terminal is:\n", "gray70"
 "end","    Maximum number of individuals\n", "OliveDrab1"
 "end","    Minimum number of individuals\n", "OliveDrab1"
@@ -37,3 +38,4 @@
 "end","    Minimum number of size\n", "OliveDrab1"
 "end","    Most appearing velocity\n", "OliveDrab1"
 "end","    Most appearing size\n", "OliveDrab1"
+"end","    Total time of execution\n", "OliveDrab1"

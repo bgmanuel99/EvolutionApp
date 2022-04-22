@@ -25,25 +25,36 @@ class VariousDimensionGradient(Canvas):
         self.delete("gradient")
 
         width = self.winfo_width()
-        limit = self.winfo_height()
+        limit = int(self.winfo_height() / len(self.colors))
+        
+        rgb_colors = []
+        for color in self.colors:
+            r, g, b = self.winfo_rgb(color)
+            rgb_colors.append((r, g, b))
 
-        # CHANGE THIS PART FOR THE NEW GRADIENT ALGORITHM
-        #------------------------------------------------------
-        (r1,g1,b1) = self.winfo_rgb(self.color1)
-        (r2,g2,b2) = self.winfo_rgb(self.color2)
-        r_ratio = float(r2-r1) / limit
-        g_ratio = float(g2-g1) / limit
-        b_ratio = float(b2-b1) / limit
+        rgb_ratios = []
+        for i in range(len(rgb_colors)-1):
+            r_ratio = float(rgb_colors[i+1][0] - rgb_colors[i][0]) / limit
+            g_ratio = float(rgb_colors[i+1][1] - rgb_colors[i][1]) / limit
+            b_ratio = float(rgb_colors[i+1][2] - rgb_colors[i][2]) / limit
+            rgb_ratios.append((r_ratio, g_ratio, b_ratio))
 
-        for i in range(limit):
-            nr = int(r1 + (r_ratio * i))
-            ng = int(g1 + (g_ratio * i))
-            nb = int(b1 + (b_ratio * i))
-            color = "#%4.4x%4.4x%4.4x" % (nr, ng, nb)
-            self.create_line(0, i, width, i, tags=("gradient",), fill=color)
+        start_limit = 0
+        end_limit = limit
+        multiplicator = 0
+        for i in range(len(rgb_colors)-1):
+            for j in range(start_limit, end_limit):
+                nr = int(rgb_colors[i][0] + (rgb_ratios[i][0] * multiplicator))
+                ng = int(rgb_colors[i][1] + (rgb_ratios[i][1] * multiplicator))
+                nb = int(rgb_colors[i][2] + (rgb_ratios[i][2] * multiplicator))
+                multiplicator += 1
+                color = "#%4.4x%4.4x%4.4x" % (nr, ng, nb)
+                self.create_line(0, j, width, j, tags=("gradient",), fill=color)
 
-        #------------------------------------------------------
-            
+            start_limit += limit
+            end_limit += limit
+            multiplicator = 0
+
         self.lower("gradient")
 
     def set_new_colors(self, *args):

@@ -8,7 +8,6 @@ class Species:
     def __init__(self, size, velocity):
         self.size = size
         self.velocity = velocity
-        self.energy = 0
         self.movement_time = 0
         self.time_to_switch_movement = random.randint(3000, 4500)
         self.food_pieces = 0

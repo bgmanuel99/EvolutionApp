@@ -29,7 +29,7 @@ class InformationFrame(Frame, Observer):
 
         # Election button for the commands terminal, made from a frame and a label
         self.terminal_election_frame = Frame(self.panel_of_elections)
-        self.terminal_election_frame.pack(side=LEFT, anchor=W, padx=(6, 5), pady=(4, 6))
+        self.terminal_election_frame.pack(side=LEFT, anchor=W, padx=(6, 2), pady=(4, 6))
         self.terminal_election_label = Label(self.terminal_election_frame, text="TERMINAL")
         self.terminal_election_label.pack(side=TOP)
         self.terminal_election_label.config(background="gray8", foreground="gray70", font=("Terminal", 11))
@@ -39,9 +39,13 @@ class InformationFrame(Frame, Observer):
         self.terminal_election_label.bind("<Button-1>", self.focus_terminal)
         self.terminal_election_label.bind("<Enter>", lambda event: self.terminal_election_label.config(cursor="hand2"))
 
+        self.terminal_election_lateral_label = Label(self.panel_of_elections, width=3)
+        self.terminal_election_lateral_label.pack(side=LEFT, anchor=W)
+        self.terminal_election_lateral_label.config(background="gray8", foreground="gray70", font=("Terminal", 11))
+
         # Election button for the problems terminal, made from a frame and a label
         self.errors_election_frame = Frame(self.panel_of_elections)
-        self.errors_election_frame.pack(side=LEFT, anchor=W, padx=(1, 5), pady=(4, 6))
+        self.errors_election_frame.pack(side=LEFT, anchor=W, padx=(6, 2), pady=(4, 6))
         self.errors_election_label = Label(self.errors_election_frame, text="ERRORS")
         self.errors_election_label.pack(side=TOP)
         self.errors_election_label.config(background="gray8", foreground="gray50", font=("Terminal", 11))
@@ -51,9 +55,15 @@ class InformationFrame(Frame, Observer):
         self.errors_election_label.bind("<Button-1>", self.focus_errors)
         self.errors_election_label.bind("<Enter>", lambda event: self.errors_election_label.config(cursor="hand2"))
 
+        self.errors_election_lateral_label_variable = StringVar()
+        self.errors_election_lateral_label_variable.set("")
+        self.errors_election_lateral_label = Label(self.panel_of_elections, textvariable=self.errors_election_lateral_label_variable, width=3)
+        self.errors_election_lateral_label.pack(side=LEFT, anchor=W)
+        self.errors_election_lateral_label.config(background="gray8", foreground="white", font=("Terminal", 11))
+
         # Election button for the characteristics terminal, made from a frame and a label
         self.characteristics_election_frame = Frame(self.panel_of_elections)
-        self.characteristics_election_frame.pack(side=LEFT, anchor=W, padx=(1, 6), pady=(4, 6))
+        self.characteristics_election_frame.pack(side=LEFT, anchor=W, padx=(6, 2), pady=(4, 6))
         self.characteristics_election_label = Label(self.characteristics_election_frame, text="CHARACTERISTICS")
         self.characteristics_election_label.pack(side=TOP)
         self.characteristics_election_label.config(background="gray8", foreground="gray50", font=("Terminal", 11))
@@ -62,6 +72,10 @@ class InformationFrame(Frame, Observer):
         self.characteristics_election_focus.config(background="gray8")
         self.characteristics_election_label.bind("<Button-1>", self.focus_characteristics)
         self.characteristics_election_label.bind("<Enter>", lambda event: self.characteristics_election_label.config(cursor="hand2"))
+
+        self.characteristics_election_lateral_label = Label(self.panel_of_elections, width=3)
+        self.characteristics_election_lateral_label.pack(side=LEFT, anchor=W)
+        self.characteristics_election_lateral_label.config(background="gray8", foreground="gray70", font=("Terminal", 11))
 
         # This are the objects which contains the three terminals. The main_frame contains the terminal to be actually displayed in the app.
         # The actual_focus_frame object is used so that if a terminal was already selected it doesnt change anything by pressing it another time.
@@ -79,7 +93,6 @@ class InformationFrame(Frame, Observer):
             "message": self.terminal_frame.process_message,
             "error": self.errors_frame.write_error,
             "warning": self.errors_frame.write_warning,
-            "info": self.errors_frame.write_info,
             "terminal_status": self.terminal_frame.switch_terminal_status,
             "update_characteristics_data": self.characteristics_frame.update_data,
             "update_time": self.characteristics_frame.update_algorithm_time_of_execution,
@@ -87,12 +100,30 @@ class InformationFrame(Frame, Observer):
             "execution_failed": self.terminal_frame.write_command,
         }
 
+        self.errors_counter = 0
+        self.warnings_counter = 0
+
     def update(self, *args) -> None:
         """Receive the update from the publisher"""
 
         if args[0] in ["clear", "copy", "paste"]: self.terminal_methods[args[0]]()
         elif args[0] == "message": self.terminal_methods[args[0]](args[1], args[2][0], args[2][1], args[2][2], args[2][3])
-        elif args[0] == "error" or args[0] == "warning" or args[0] == "info": self.terminal_methods[args[0]](args[1], args[2][0], args[2][1])
+        elif args[0] == "error" or args[0] == "warning":
+            self.terminal_methods[args[0]](args[1], args[2][0], args[2][1])
+
+            if self.actual_focus_frame != "errors":
+                if args[0] == "warning": self.warnings_counter += 1
+                elif args[0] == "error": self.errors_counter += 1
+
+                if self.warnings_counter >= 1 and self.errors_counter == 0:
+                    self.errors_election_lateral_label.config(background="gold")
+                elif self.errors_counter >= 1:
+                    self.errors_election_lateral_label.config(background="red")
+
+                actual_number_of_errors = self.errors_election_lateral_label_variable.get()
+                if actual_number_of_errors == "": self.errors_election_lateral_label_variable.set("1")
+                elif (self.warnings_counter + self.errors_counter) >= 99: self.errors_election_lateral_label_variable.set("+99")
+                else: self.errors_election_lateral_label_variable.set(self.warnings_counter + self.errors_counter)
         elif args[0] == "terminal_status": self.terminal_methods[args[0]](args[1])
         elif args[0] == "update_characteristics_data": self.terminal_methods[args[0]](args[1])
         elif args[0] == "change_environment":
@@ -140,6 +171,11 @@ class InformationFrame(Frame, Observer):
             self.terminal_election_label.config(foreground="gray50")
             self.characteristics_election_focus.config(background="gray8")
             self.characteristics_election_label.config(foreground="gray50")
+
+            self.errors_election_lateral_label.config(background="gray8")
+            self.errors_election_lateral_label_variable.set("")
+            self.warnings_counter = 0
+            self.errors_counter = 0
 
             self.main_frame.pack_forget()
             self.main_frame = self.errors_frame
